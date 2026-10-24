@@ -17,6 +17,16 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      proxy: {
+        '/api/backend-messages': {
+          target: 'https://traffic-spearfish-tweezers.ngrok-free.dev',
+          changeOrigin: true,
+          rewrite: () => '/messages',
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
+        },
+      },
     },
   };
 });

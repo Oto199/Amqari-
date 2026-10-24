@@ -25,12 +25,17 @@ export const EvaluationView: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-            <ShieldCheck className="w-6 h-6 text-emerald-500" />
-            <span>AI აგენტის შეფასება & ბენჩმარკი (Evaluation & Benchmarks)</span>
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+              <ShieldCheck className="w-6 h-6 text-emerald-500" />
+              <span>AI აგენტის შეფასება & ბენჩმარკი (Evaluation & Benchmarks)</span>
+            </h1>
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              Demo Data
+            </span>
+          </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            ჰალუცინაციების პრევენციის, ინვენტარის გადამოწმებისა და ქართული ენის გაგების მკაცრი ტესტები
+            ჰალუცინაციების პრევენციის, ინვენტარის გადამოწმებისა და ქართული ენის გაგების სატესტო სცენარები
           </p>
         </div>
 

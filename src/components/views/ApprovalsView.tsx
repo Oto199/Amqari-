@@ -48,10 +48,15 @@ export const ApprovalsView: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-            <CheckCircle2 className="w-6 h-6 text-emerald-500" />
-            <span>ადამიანის თანხმობის ცენტრი (Human Approval Center)</span>
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+              <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+              <span>ადამიანის თანხმობის ცენტრი (Human Approval Center)</span>
+            </h1>
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              Demo Data
+            </span>
+          </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             ფასდაკლების მოთხოვნები, რომლებიც სცდება AI-ის ავტომატურ ლიმიტს (მაქს. 15-20%) და მოითხოვს მენეჯერის გადაწყვეტილებას
           </p>

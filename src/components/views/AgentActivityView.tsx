@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 export const AgentActivityView: React.FC = () => {
-  const { traces, runTraceSimulation } = useApp();
+  const { traces, runPipelineForText } = useApp();
   const [selectedTraceId, setSelectedTraceId] = useState<string>(traces[0]?.id || '');
   const [customInput, setCustomInput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
@@ -24,17 +24,20 @@ export const AgentActivityView: React.FC = () => {
   const activeTrace: AgentReasoningTrace | undefined =
     traces.find((t) => t.id === selectedTraceId) || traces[0];
 
-  const handleRunCustomSimulation = (e: React.FormEvent) => {
+  const handleRunCustomSimulation = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customInput.trim()) return;
 
     setIsRunning(true);
-    setTimeout(() => {
-      const trace = runTraceSimulation(customInput.trim());
-      setSelectedTraceId(trace.id);
-      setIsRunning(false);
+    try {
+      const res = await runPipelineForText(customInput.trim());
+      setSelectedTraceId(res.trace.id);
       setCustomInput('');
-    }, 450);
+    } catch (err) {
+      console.error('Error running pipeline in AgentActivityView:', err);
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   return (

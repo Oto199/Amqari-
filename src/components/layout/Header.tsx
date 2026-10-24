@@ -3,10 +3,12 @@ import { useApp } from '../../context/AppContext';
 import { Sparkles, Bot, AlertCircle } from 'lucide-react';
 
 export const Header: React.FC = () => {
-  const { page, setPage, approvals, settings } = useApp();
+  const { page, setPage, approvals, settings, isMetaConnected } = useApp();
 
   const getPageTitle = () => {
     switch (page) {
+      case 'demoday':
+        return 'Demo Day Live Journey · მომხმარებლის გზა';
       case 'dashboard':
         return 'მართვის პანელი';
       case 'inbox':
@@ -43,13 +45,13 @@ export const Header: React.FC = () => {
 
       {/* Center/Right Zone: Status and Primary Action */}
       <div className="flex items-center gap-3">
-        {/* Agent Operational Status */}
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs">
-          <Bot className="w-3.5 h-3.5 text-emerald-500" />
-          <span className="text-slate-600 dark:text-slate-400 font-medium">ავტონომიური აგენტი:</span>
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-            {settings.autoReplyEnabled ? 'ჩართული (24/7)' : 'შეჩერებული'}
-          </span>
+        {/* Meta API Connection Status Badge */}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-semibold">
+          {isMetaConnected ? (
+            <span className="text-emerald-600 dark:text-emerald-400">🟢 Meta Connected</span>
+          ) : (
+            <span className="text-red-600 dark:text-red-400">🔴 Meta Offline</span>
+          )}
         </div>
 
         {/* Pending Approval Alert button */}

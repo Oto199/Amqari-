@@ -1,4 +1,5 @@
 export type PageId =
+  | 'demoday'
   | 'login'
   | 'dashboard'
   | 'inbox'
@@ -9,6 +10,15 @@ export type PageId =
   | 'analytics'
   | 'settings'
   | 'evaluation';
+
+export interface BackendMessage {
+  sender_id: string;
+  text: string;
+  received_at: string;
+  event_id?: string;
+  instagram_timestamp?: string;
+  [key: string]: any;
+}
 
 export type ProductStatus = 'active' | 'low_stock' | 'out_of_stock';
 
@@ -78,6 +88,8 @@ export interface Message {
   sender: 'customer' | 'ai_agent' | 'human_agent';
   text: string;
   timestamp: string;
+  sender_id?: string;
+  received_at?: string;
   read?: boolean;
   aiMetadata?: {
     intent: string;
@@ -96,6 +108,39 @@ export interface AiTimeline {
   orderCreated?: { orderId: string; timestamp: string };
 }
 
+export type AgentProcessingStatus =
+  | 'received'
+  | 'processing'
+  | 'completed'
+  | 'failed';
+
+export interface ExtractionResult {
+  productQuery: string | null;
+  size: string | null;
+  customerOffer: number | null;
+  intent: string;
+  durationMs: number;
+  source: string;
+  extractionSource?: string;
+  geminiAvailable?: boolean;
+}
+
+export interface PipelineExecutionResult {
+  eventId?: string;
+  senderId?: string;
+  trace: AgentReasoningTrace;
+  matchedProduct: Product;
+  selectedSize: string;
+  stock: number;
+  decisionType: 'Accept' | 'Counter Offer' | 'Out of Stock' | 'Human Approval';
+  decisionDetails: string;
+  counterOfferPrice: number | null;
+  generatedReply: string;
+  measuredLatencyMs: number;
+  extraction: ExtractionResult;
+  repliedToChat?: boolean;
+}
+
 export interface Conversation {
   id: string;
   customer: Customer;
@@ -106,6 +151,9 @@ export interface Conversation {
   aiHandled: boolean;
   orderId?: string;
   timeline: AiTimeline;
+  latestAgentResult?: PipelineExecutionResult;
+  lastEventId?: string;
+  agentProcessingStatus?: AgentProcessingStatus;
 }
 
 export interface ApprovalRequest {

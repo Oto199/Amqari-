@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
   PageId,
   Product,
@@ -10,6 +10,8 @@ import {
   BenchmarkMetric,
   BenchmarkTestCase,
   Message,
+  Customer,
+  BackendMessage,
 } from '../types';
 import {
   INITIAL_PRODUCTS,
@@ -21,6 +23,11 @@ import {
   INITIAL_BENCHMARKS,
   BENCHMARK_TEST_CASES,
 } from '../data/mockData';
+import {
+  executeAgentPipeline,
+  PipelineExecutionResult,
+  matchCatalogueProduct,
+} from '../services/agentPipeline';
 
 interface AppContextType {
   page: PageId;
@@ -30,6 +37,15 @@ interface AppContextType {
   logout: () => void;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+
+  // Meta API Connection Status & Live Backend Data
+  isMetaConnected: boolean;
+  backendMessageCount: number;
+  rawBackendResponse: any;
+  backendMessages: BackendMessage[];
+  lastPollTimestamp: string;
+  lastPollError: string | null;
+  refreshBackendMessages: () => Promise<void>;
 
   // Conversations & Messaging
   conversations: Conversation[];
@@ -69,12 +85,20 @@ interface AppContextType {
   benchmarkTests: BenchmarkTestCase[];
   runBenchmarkTests: () => Promise<void>;
   isTestingBenchmarks: boolean;
+
+  // Real Vertical Decision Pipeline & Event Tracking
+  pipelineResult: PipelineExecutionResult | null;
+  isProcessingPipeline: boolean;
+  runPipelineForText: (text: string) => Promise<PipelineExecutionResult>;
+  agentResultsByEventId: Record<string, PipelineExecutionResult>;
+  processingEventIds: string[];
+  processedEventIds: string[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [page, setPage] = useState<PageId>('dashboard');
+  const [page, setPage] = useState<PageId>('inbox');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
 
@@ -88,9 +112,387 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [settings, setSettings] = useState<BusinessSettings>(INITIAL_SETTINGS);
   const [traces, setTraces] = useState<AgentReasoningTrace[]>(INITIAL_TRACES);
 
+  // Event ID processing tracking
+  const processedEventIdsRef = useRef<Set<string>>(new Set());
+  const processingEventIdsRef = useRef<Set<string>>(new Set());
+
+  const [agentResultsByEventId, setAgentResultsByEventId] = useState<Record<string, PipelineExecutionResult>>({});
+  const [processingEventIds, setProcessingEventIds] = useState<string[]>([]);
+  const [processedEventIds, setProcessedEventIds] = useState<string[]>([]);
+
+  // Refs for poller and async pipeline to avoid stale closures
+  const productsRef = useRef(products);
+  useEffect(() => {
+    productsRef.current = products;
+  }, [products]);
+
+  const settingsRef = useRef(settings);
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+
   const [benchmarkMetrics] = useState<BenchmarkMetric[]>(INITIAL_BENCHMARKS);
   const [benchmarkTests, setBenchmarkTests] = useState<BenchmarkTestCase[]>(BENCHMARK_TEST_CASES);
   const [isTestingBenchmarks, setIsTestingBenchmarks] = useState<boolean>(false);
+
+  const [isMetaConnected, setIsMetaConnected] = useState<boolean>(true);
+  const [backendMessageCount, setBackendMessageCount] = useState<number>(0);
+  const [rawBackendResponse, setRawBackendResponse] = useState<any>(null);
+  const [backendMessages, setBackendMessages] = useState<any[]>([]);
+  const [lastPollTimestamp, setLastPollTimestamp] = useState<string>('');
+  const [lastPollError, setLastPollError] = useState<string | null>(null);
+
+  // Real Vertical Decision Pipeline State
+  const initialMatchedProduct = INITIAL_PRODUCTS.find((p) => p.id === 'prod-3') || INITIAL_PRODUCTS[0];
+  const [pipelineResult, setPipelineResult] = useState<PipelineExecutionResult | null>({
+    matchedProduct: initialMatchedProduct,
+    selectedSize: 'M',
+    stock: 2,
+    decisionType: 'Counter Offer',
+    decisionDetails: 'შემოთავაზება (50₾) მინიმალურ ზღვარზე (90₾) ნაკლებია. მიღება აკრძალულია. კონტრშეთავაზება: 90₾.',
+    counterOfferPrice: 90,
+    generatedReply: 'გამარჯობა.\nრეალ მადრიდი 2024/25 Home Kit M ზომაში გვაქვს მარაგში (2 ცალი).\nფასი არის 110 ლარი.\nშეგვიძლია შემოგთავაზოთ საუკეთესო ფასი 90 ლარი.\nგსურთ შეკვეთის გაფორმება?',
+    measuredLatencyMs: 248,
+    extraction: {
+      productQuery: 'რეალ მადრიდი',
+      size: 'M',
+      customerOffer: 50,
+      intent: 'DISCOUNT_NEGOTIATION',
+      durationMs: 236,
+      source: 'gemini-3.8-flash',
+    },
+    trace: {
+      id: 'trc-verified-01',
+      timestamp: new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      customerMessage: 'რეალ მადრიდის მაისური M ზომა 50 ლარად თუ გაქვთ?',
+      intent: 'DISCOUNT_NEGOTIATION',
+      inventoryLookup: {
+        product: 'რეალ მადრიდი 2024/25 Home Kit',
+        size: 'M',
+        inStock: true,
+        quantity: 2,
+      },
+      pricingRules: {
+        basePrice: 110,
+        minAllowedPrice: 90,
+        requestedPrice: 50,
+        allowedDiscount: 20,
+        actionRecommended: 'COUNTER_OFFER',
+      },
+      decision: 'COUNTER_OFFER: შემოთავაზება (50₾) მინიმალურ ზღვარზე (90₾) ნაკლებია. მიღება აკრძალულია. კონტრშეთავაზება: 90₾.',
+      finalResponse: 'გამარჯობა.\nრეალ მადრიდი 2024/25 Home Kit M ზომაში გვაქვს მარაგში (2 ცალი).\nფასი არის 110 ლარი.\nშეგვიძლია შემოგთავაზოთ საუკეთესო ფასი 90 ლარი.\nგსურთ შეკვეთის გაფორმება?',
+      executionTimeMs: 248,
+      confidenceScore: 0,
+      toolCalls: [
+        'extract_entities(engine="gemini-3.8-flash", latency=236ms)',
+        'lookup_catalogue(sku="prod-3", size="M") -> stock=2',
+        'evaluate_pricing(base=110, floor=90, offer=50) -> COUNTER_OFFER (min 90)',
+      ],
+    },
+  });
+  const [isProcessingPipeline, setIsProcessingPipeline] = useState<boolean>(false);
+
+  // Core fetch function for GET /messages
+  const fetchMessagesFromBackend = async () => {
+    const primaryUrl = 'https://traffic-spearfish-tweezers.ngrok-free.dev/messages';
+    const proxyUrl = '/api/backend-messages';
+
+    let data: any = null;
+    let fetchSuccess = false;
+    let lastErr: any = null;
+
+    // 1. Try direct URL first
+    try {
+      const res = await fetch(primaryUrl, {
+        method: 'GET',
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          Accept: 'application/json',
+        },
+      });
+
+      if (res.ok) {
+        data = await res.json();
+        fetchSuccess = true;
+      } else {
+        lastErr = new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+    } catch (err: any) {
+      lastErr = err;
+    }
+
+    // 2. Fallback to proxy if direct failed
+    if (!fetchSuccess) {
+      try {
+        const res = await fetch(proxyUrl, {
+          method: 'GET',
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+            Accept: 'application/json',
+          },
+        });
+
+        if (res.ok) {
+          data = await res.json();
+          fetchSuccess = true;
+        } else {
+          lastErr = new Error(`Proxy HTTP ${res.status}: ${res.statusText}`);
+        }
+      } catch (err: any) {
+        lastErr = err;
+      }
+    }
+
+    const timestampStr = new Date().toLocaleTimeString('ka-GE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+    setLastPollTimestamp(timestampStr);
+
+    if (fetchSuccess && data && data.status === 'ok') {
+      setIsMetaConnected(true);
+      setLastPollError(null);
+      setRawBackendResponse(data);
+
+      // Requirement 2: Log the API response to browser console
+      console.log('📡 [Meta API Polling] GET /messages response:', data);
+
+      // Requirement 3: Verify the "messages" array is being parsed correctly
+      const incomingMsgs: any[] = Array.isArray(data.messages) ? data.messages : [];
+      console.log('📩 [Meta API Polling] Parsed messages array:', incomingMsgs);
+
+      setBackendMessages(incomingMsgs);
+      setBackendMessageCount(incomingMsgs.length);
+
+      // Requirement 4, 5, 6, 7: Render every item from response.messages and update conversation state
+      if (incomingMsgs.length > 0) {
+        syncBackendMessagesToConversations(incomingMsgs);
+      }
+    } else {
+      setIsMetaConnected(false);
+      const errMsg = lastErr ? String(lastErr.message || lastErr) : 'Unknown connection error';
+      setLastPollError(errMsg);
+      console.warn('⚠️ [Meta API Polling] Connection offline:', errMsg);
+    }
+  };
+
+  const syncBackendMessagesToConversations = (incomingMsgs: any[]) => {
+    // Process each message from the backend response
+    incomingMsgs.forEach((bm) => {
+      const senderId = String(bm.sender_id || 'customer-01');
+      const text = String(bm.text || '').trim();
+      const receivedAt = bm.received_at || new Date().toISOString();
+      const eventId = String(bm.event_id || `evt-${senderId}-${receivedAt}`);
+      const timeFormatted = receivedAt
+        ? new Date(receivedAt).toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' })
+        : new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' });
+
+      const convId = `conv-meta-${senderId}`;
+      const msgId = bm.event_id ? `msg-meta-${bm.event_id}` : `msg-meta-${senderId}-${receivedAt}`;
+
+      const newMsg: Message = {
+        id: msgId,
+        conversationId: convId,
+        sender: 'customer',
+        text,
+        sender_id: senderId,
+        received_at: receivedAt,
+        timestamp: timeFormatted,
+        read: false,
+      };
+
+      // 1. Add customer message to conversation state
+      setConversations((prev) => {
+        const existingIndex = prev.findIndex(
+          (c) =>
+            c.id === convId ||
+            c.customer.id === `cust-meta-${senderId}` ||
+            c.customer.handle === `@${senderId}`
+        );
+
+        if (existingIndex >= 0) {
+          const updated = [...prev];
+          const existingConv = updated[existingIndex];
+          const msgAlreadyExists = existingConv.messages.some(
+            (m) => m.id === msgId || (m.text === text && m.timestamp === timeFormatted)
+          );
+
+          const updatedMessages = msgAlreadyExists
+            ? existingConv.messages
+            : [...existingConv.messages, newMsg];
+
+          updated[existingIndex] = {
+            ...existingConv,
+            lastMessage: newMsg,
+            messages: updatedMessages,
+            unreadCount: msgAlreadyExists ? existingConv.unreadCount : existingConv.unreadCount + 1,
+            status: 'active',
+          };
+
+          const [activeConv] = updated.splice(existingIndex, 1);
+          return [activeConv, ...updated];
+        } else {
+          // Create new conversation for this sender_id
+          const newCustomer: Customer = {
+            id: `cust-meta-${senderId}`,
+            name: `Instagram (${senderId})`,
+            handle: `@${senderId}`,
+            avatarUrl:
+              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+            previousOrdersCount: 0,
+            lifetimeValue: 0,
+            riskLevel: 'low',
+            riskReason: 'Instagram Direct ახალი მომხმარებელი',
+            phone: 'არ არის მითითებული',
+            city: 'თბილისი',
+          };
+
+          const newConv: Conversation = {
+            id: convId,
+            customer: newCustomer,
+            lastMessage: newMsg,
+            messages: [newMsg],
+            unreadCount: 1,
+            status: 'active',
+            aiHandled: true,
+            timeline: {
+              productIdentified: {
+                name: 'მიმდინარეობს ანალიზი...',
+                timestamp: timeFormatted,
+              },
+              inventoryChecked: {
+                details: 'მოწმდება კატალოგი...',
+                timestamp: timeFormatted,
+              },
+            },
+          };
+
+          return [newConv, ...prev];
+        }
+      });
+
+      // 2. Ignore if event_id is already processing or completed
+      if (processedEventIdsRef.current.has(eventId) || processingEventIdsRef.current.has(eventId)) {
+        return;
+      }
+
+      // 3. Mark event_id as processing
+      processingEventIdsRef.current.add(eventId);
+      setProcessingEventIds(Array.from(processingEventIdsRef.current));
+
+      // 4. Focus this conversation so the user sees real-time reasoning
+      setSelectedConversationId(convId);
+
+      // 5. Call actual agent pipeline for this event
+      setIsProcessingPipeline(true);
+      executeAgentPipeline(text, productsRef.current, settingsRef.current, { eventId, senderId })
+        .then((result) => {
+          // Mark completed
+          processingEventIdsRef.current.delete(eventId);
+          processedEventIdsRef.current.add(eventId);
+          setProcessingEventIds(Array.from(processingEventIdsRef.current));
+          setProcessedEventIds(Array.from(processedEventIdsRef.current));
+
+          // Store result in agentResultsByEventId
+          setAgentResultsByEventId((prev) => ({
+            ...prev,
+            [eventId]: result,
+          }));
+
+          setPipelineResult(result);
+          setTraces((prev) => [result.trace, ...prev]);
+
+          // Update conversation with latestAgentResult and auto-reply
+          setConversations((prev) =>
+            prev.map((c) => {
+              if (c.id === convId) {
+                const shouldAutoReply = settingsRef.current.autoReplyEnabled;
+                let updatedMessages = c.messages;
+
+                if (shouldAutoReply && result.generatedReply) {
+                  const aiMsgId = `reply-ai-${eventId}`;
+                  const alreadyReplied = c.messages.some((m) => m.id === aiMsgId);
+                  if (!alreadyReplied) {
+                    const aiMsg: Message = {
+                      id: aiMsgId,
+                      conversationId: c.id,
+                      sender: 'ai_agent',
+                      text: result.generatedReply,
+                      timestamp: new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' }),
+                      read: true,
+                      aiMetadata: {
+                        intent: result.trace.intent,
+                        productMatch: result.matchedProduct.title,
+                        inventoryChecked: true,
+                        discountOffered: result.counterOfferPrice ?? undefined,
+                        actionTaken: result.decisionType,
+                        confidence: 0,
+                      },
+                    };
+                    updatedMessages = [...updatedMessages, aiMsg];
+                  }
+                }
+
+                return {
+                  ...c,
+                  lastMessage: updatedMessages[updatedMessages.length - 1],
+                  messages: updatedMessages,
+                  latestAgentResult: result,
+                  lastEventId: eventId,
+                  agentProcessingStatus: 'completed',
+                  timeline: {
+                    productIdentified: {
+                      name: result.matchedProduct.title,
+                      timestamp: result.trace.timestamp,
+                    },
+                    inventoryChecked: {
+                      details: `${result.selectedSize} ზომა: ${result.stock} ცალი მარაგში`,
+                      timestamp: result.trace.timestamp,
+                    },
+                    discountEvaluated: {
+                      details: result.decisionDetails,
+                      timestamp: result.trace.timestamp,
+                    },
+                  },
+                };
+              }
+              return c;
+            })
+          );
+        })
+        .catch((err) => {
+          console.error('Agent pipeline execution failed for event:', eventId, err);
+          processingEventIdsRef.current.delete(eventId);
+          setProcessingEventIds(Array.from(processingEventIdsRef.current));
+        })
+        .finally(() => {
+          setIsProcessingPipeline(false);
+        });
+    });
+  };
+
+  // Polling GET /messages every 3 seconds from the backend
+  useEffect(() => {
+    let isMounted = true;
+
+    const runPoll = async () => {
+      if (!isMounted) return;
+      await fetchMessagesFromBackend();
+    };
+
+    runPoll();
+    const interval = setInterval(runPoll, 3000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  const refreshBackendMessages = async () => {
+    await fetchMessagesFromBackend();
+  };
 
   // Sync dark mode class on document
   useEffect(() => {
@@ -146,43 +548,61 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  const triggerAiResponse = (conversationId: string, userQuery?: string) => {
+  const runPipelineForText = async (text: string): Promise<PipelineExecutionResult> => {
+    setIsProcessingPipeline(true);
+    const localEventId = `evt-manual-${Date.now()}`;
+    try {
+      const result = await executeAgentPipeline(
+        text,
+        productsRef.current,
+        settingsRef.current,
+        { eventId: localEventId }
+      );
+      setPipelineResult(result);
+      setAgentResultsByEventId((prev) => ({ ...prev, [localEventId]: result }));
+      setTraces((prev) => [result.trace, ...prev]);
+
+      if (selectedConversationId) {
+        setConversations((prev) =>
+          prev.map((c) => {
+            if (c.id === selectedConversationId) {
+              return {
+                ...c,
+                latestAgentResult: result,
+                lastEventId: localEventId,
+              };
+            }
+            return c;
+          })
+        );
+      }
+
+      return result;
+    } finally {
+      setIsProcessingPipeline(false);
+    }
+  };
+
+  const triggerAiResponse = async (conversationId: string, userQuery?: string) => {
     setIsAiTyping(true);
 
     const conv = conversations.find((c) => c.id === conversationId);
     const lastCustomerMsg = userQuery || conv?.lastMessage.text || 'გამარჯობა';
 
-    setTimeout(() => {
-      let reply = 'გამარჯობა! რით შემიძლია დაგეხმაროთ? გვაქვს საქართველოს ნაკრებისა და რეტრო საფეხბურთო ფორმების უახლესი კოლექცია.';
-      let intent = 'general_inquiry';
-      let action = 'Answered customer inquiry with active catalog highlights';
-
-      const lower = lastCustomerMsg.toLowerCase();
-      if (lower.includes('ფასდაკლებ') || lower.includes('ლარად') || lower.includes('დამიკელი') || lower.includes('50') || lower.includes('60')) {
-        intent = 'price_negotiation';
-        reply = 'გასაგებია თქვენი შემოთავაზება! ჩვენი მინიმალური ზღვარი 65-75 ლარის ფარგლებშია. შემიძლია სპეციალური ფასი 70 ლარი დაგიდასტუროთ + უფასო მიტანა თბილისში 120₾-ზე ზემოთ!';
-        action = 'Applied negotiation policy within margin constraints';
-      } else if (lower.includes('ზომა') || lower.includes('მარაგ') || lower.includes('გაქვთ') || lower.includes('ნაკრებ')) {
-        intent = 'inventory_check';
-        reply = 'დიახ, საქართველოს ნაკრების 2024 წლის თეთრი მაისური კვარაცხელიას ნომრით გვაქვს L და S ზომებში. ფასი 85 ლარია.';
-        action = 'Queried database: stock available, active status';
-      } else if (lower.includes('მისამართი') || lower.includes('ვიყიდი') || lower.includes('ავიღებ') || lower.includes('მინდა')) {
-        intent = 'order_collection';
-        reply = 'შესანიშნავია! გთხოვთ მომწეროთ თქვენი მობილურის ნომერი და ზუსტი მისამართი, რათა შეკვეთა კურიერს გადავცეთ.';
-        action = 'Initiated order intake checklist';
-      }
+    try {
+      const result = await runPipelineForText(lastCustomerMsg);
 
       const aiMsg: Message = {
         id: `msg-${Date.now()}`,
         conversationId,
         sender: 'ai_agent',
-        text: reply,
+        text: result.generatedReply,
         timestamp: new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' }),
         read: true,
         aiMetadata: {
-          intent,
-          actionTaken: action,
-          confidence: 0.98,
+          intent: result.extraction.intent,
+          actionTaken: result.decisionDetails,
+          confidence: 0,
         },
       };
 
@@ -194,14 +614,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               lastMessage: aiMsg,
               messages: [...c.messages, aiMsg],
               unreadCount: 0,
+              timeline: {
+                ...c.timeline,
+                productIdentified: {
+                  name: `${result.matchedProduct.title} (${result.selectedSize})`,
+                  timestamp: new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' }),
+                },
+                inventoryChecked: {
+                  details: `ზომა ${result.selectedSize}: ${result.stock} ცალი (ფასი: ${result.matchedProduct.price}₾, მინ: ${result.matchedProduct.minPrice}₾)`,
+                  timestamp: new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' }),
+                },
+                discountEvaluated: {
+                  details: result.decisionDetails,
+                  timestamp: new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' }),
+                },
+              },
             };
           }
           return c;
         })
       );
-
+    } catch (err) {
+      console.error('Pipeline processing error in triggerAiResponse:', err);
+    } finally {
       setIsAiTyping(false);
-    }, 1200);
+    }
   };
 
   const handleApproveRequest = (approvalId: string) => {
@@ -303,6 +740,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return p;
       })
     );
+
+    // Keep pipelineResult reactive
+    setPipelineResult((prev: PipelineExecutionResult | null) => {
+      if (!prev || prev.matchedProduct.id !== productId || prev.selectedSize !== sizeName) {
+        return prev;
+      }
+      const newStock = Math.max(0, prev.stock + delta);
+      const isOutOfStock = newStock === 0;
+      const decisionType = isOutOfStock
+        ? 'Out of Stock'
+        : prev.extraction.customerOffer !== null && prev.extraction.customerOffer < prev.matchedProduct.minPrice
+        ? 'Counter Offer'
+        : 'Accept';
+
+      const decisionDetails = isOutOfStock
+        ? `მარაგი ამოწურულია: ${sizeName} ზომა არის 0 ცალი.`
+        : prev.extraction.customerOffer !== null && prev.extraction.customerOffer < prev.matchedProduct.minPrice
+        ? `შემოთავაზება (${prev.extraction.customerOffer}₾) მინიმალურ ზღვარზე (${prev.matchedProduct.minPrice}₾) ნაკლებია. მიღება აკრძალულია. კონტრშეთავაზება: ${prev.counterOfferPrice}₾.`
+        : `მარაგის დადასტურება: ${sizeName} ზომა ხელმისაწვდომია (${newStock} ცალი).`;
+
+      const generatedReply = isOutOfStock
+        ? `გამარჯობა.\nსამწუხაროდ, ${prev.matchedProduct.title} ${sizeName} ზომაში ამოწურულია.\nშეგირჩიოთ ალტერნატიული მოდელი?`
+        : prev.extraction.customerOffer !== null && prev.extraction.customerOffer < prev.matchedProduct.minPrice
+        ? `გამარჯობა.\n${prev.matchedProduct.title} ${sizeName} ზომაში გვაქვს მარაგში (${newStock} ცალი).\nფასი არის ${prev.matchedProduct.price} ლარი.\nშეგვიძლია შემოგთავაზოთ საუკეთესო ფასი ${prev.counterOfferPrice} ლარი.\nგსურთ შეკვეთის გაფორმება?`
+        : `გამარჯობა.\n${prev.matchedProduct.title} ${sizeName} ზომა ხელმისაწვდომია (${newStock} ცალი).\nფასი არის ${prev.matchedProduct.price} ლარი.\nგსურთ შეკვეთის გაფორმება?`;
+
+      return {
+        ...prev,
+        stock: newStock,
+        decisionType,
+        decisionDetails,
+        generatedReply,
+        trace: {
+          ...prev.trace,
+          inventoryLookup: {
+            ...prev.trace.inventoryLookup,
+            inStock: newStock > 0,
+            quantity: newStock,
+          },
+          decision: `${decisionType.toUpperCase()}: ${decisionDetails}`,
+          finalResponse: generatedReply,
+        },
+      };
+    });
   };
 
   const updateProductPrice = (productId: string, price: number, minPrice: number) => {
@@ -388,6 +869,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         logout,
         isDarkMode,
         toggleDarkMode,
+        isMetaConnected,
+        backendMessageCount,
+        rawBackendResponse,
+        backendMessages,
+        lastPollTimestamp,
+        lastPollError,
+        refreshBackendMessages,
         conversations,
         selectedConversationId,
         setSelectedConversationId,
@@ -413,6 +901,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         benchmarkTests,
         runBenchmarkTests,
         isTestingBenchmarks,
+        pipelineResult,
+        isProcessingPipeline,
+        runPipelineForText,
+        agentResultsByEventId,
+        processingEventIds,
+        processedEventIds,
       }}
     >
       {children}

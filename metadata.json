@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "ამქარი (Amqari) - AI Sales Agent",
+  "description": "AI sales agent for Instagram and Facebook businesses in Georgia that automatically handles customer DMs, checks inventory, negotiates within rules, and creates verified orders.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
