@@ -56,7 +56,7 @@ export const SettingsView: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-            <Settings className="w-6 h-6 text-emerald-500" />
+            <Settings className="w-6 h-6 text-[#c59d6b]" />
             <span>პარამეტრები და ბიზნეს წესები</span>
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -65,8 +65,8 @@ export const SettingsView: React.FC = () => {
         </div>
 
         {isSaved && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-xs font-semibold">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#c59d6b]/15 text-[#c59d6b] border border-[#c59d6b]/30 text-xs font-semibold">
+            <CheckCircle2 className="w-4 h-4 text-[#c59d6b]" />
             <span>პარამეტრები შენახულია!</span>
           </div>
         )}
@@ -77,12 +77,12 @@ export const SettingsView: React.FC = () => {
         <div className="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2.5">
-              <Share2 className="w-4 h-4 text-blue-500" />
+              <Share2 className="w-4 h-4 text-[#8b293e]" />
               <h2 className="text-sm font-bold text-slate-900 dark:text-white">
                 Meta (Instagram & Facebook) ინტეგრაცია
               </h2>
             </div>
-            <span className="px-2 py-0.5 text-[10px] font-semibold rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+            <span className="px-2 py-0.5 text-[10px] font-semibold rounded bg-[#c59d6b]/15 text-[#c59d6b] border border-[#c59d6b]/30">
               სინქრონიზებულია (Webhook 200 OK)
             </span>
           </div>
@@ -96,7 +96,7 @@ export const SettingsView: React.FC = () => {
                 type="text"
                 value={instagramAccount}
                 onChange={(e) => setInstagramAccount(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white font-mono"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white font-mono focus:border-[#c59d6b] outline-none"
               />
             </div>
 
@@ -108,7 +108,7 @@ export const SettingsView: React.FC = () => {
                 type="text"
                 value={facebookPage}
                 onChange={(e) => setFacebookPage(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white"
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white focus:border-[#c59d6b] outline-none"
               />
             </div>
           </div>
@@ -117,7 +117,7 @@ export const SettingsView: React.FC = () => {
         {/* Section 2: Business Rules & Negotiation Thresholds (Prompt requirement) */}
         <div className="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-5">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <Sliders className="w-4 h-4 text-emerald-500" />
+            <Sliders className="w-4 h-4 text-[#c59d6b]" />
             <h2 className="text-sm font-bold text-slate-900 dark:text-white">
               ბიზნეს წესები & ვაჭრობის ლიმიტები
             </h2>
@@ -140,19 +140,19 @@ export const SettingsView: React.FC = () => {
                 onChange={(e) => setAutoReplyEnabled(e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-slate-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600" />
+              <div className="w-11 h-6 bg-slate-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c59d6b]" />
             </label>
           </div>
 
           {/* Thresholds Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
             {/* Field: Require Approval Above Discount Threshold */}
-            <div className="p-4 rounded-lg border border-amber-200/60 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/20 space-y-2">
+            <div className="p-4 rounded-lg border border-[#8b293e]/30 bg-[#8b293e]/5 dark:bg-[#8b293e]/10 space-y-2">
               <div className="flex items-center justify-between">
                 <label className="font-bold text-slate-900 dark:text-white">
                   Require Approval Above Discount Threshold
                 </label>
-                <span className="font-bold text-amber-600 dark:text-amber-400 tabular-nums text-sm">
+                <span className="font-bold text-[#e09ba7] tabular-nums text-sm">
                   {requireApprovalAbove}%
                 </span>
               </div>
@@ -166,17 +166,17 @@ export const SettingsView: React.FC = () => {
                 step="1"
                 value={requireApprovalAbove}
                 onChange={(e) => setRequireApprovalAbove(Number(e.target.value))}
-                className="w-full accent-amber-500"
+                className="w-full accent-[#8b293e]"
               />
             </div>
 
             {/* Field: Maximum Auto Discount % */}
-            <div className="p-4 rounded-lg border border-emerald-200/60 dark:border-emerald-900/40 bg-emerald-50/30 dark:bg-emerald-950/20 space-y-2">
+            <div className="p-4 rounded-lg border border-[#c59d6b]/30 bg-[#c59d6b]/5 dark:bg-[#c59d6b]/10 space-y-2">
               <div className="flex items-center justify-between">
                 <label className="font-bold text-slate-900 dark:text-white">
                   Maximum Auto Discount % (AI მაქსიმუმი)
                 </label>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums text-sm">
+                <span className="font-bold text-[#c59d6b] tabular-nums text-sm">
                   {maxAutoDiscountPct}%
                 </span>
               </div>
@@ -190,7 +190,7 @@ export const SettingsView: React.FC = () => {
                 step="1"
                 value={maxAutoDiscountPct}
                 onChange={(e) => setMaxAutoDiscountPct(Number(e.target.value))}
-                className="w-full accent-emerald-500"
+                className="w-full accent-[#c59d6b]"
               />
             </div>
           </div>
@@ -211,7 +211,7 @@ export const SettingsView: React.FC = () => {
                   onClick={() => setToneOfVoice(t.id as any)}
                   className={`p-3 rounded-lg border cursor-pointer transition-all ${
                     toneOfVoice === t.id
-                      ? 'border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/40'
+                      ? 'border-[#c59d6b] bg-[#c59d6b]/15 shadow-xs'
                       : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
                   }`}
                 >
@@ -226,7 +226,7 @@ export const SettingsView: React.FC = () => {
         {/* Section 3: Delivery Logistics */}
         <div className="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <Truck className="w-4 h-4 text-emerald-500" />
+            <Truck className="w-4 h-4 text-[#c59d6b]" />
             <h2 className="text-sm font-bold text-slate-900 dark:text-white">
               მიტანის ტარიფები და პირობები (Courier Rules)
             </h2>
@@ -275,7 +275,7 @@ export const SettingsView: React.FC = () => {
         <div className="flex justify-end pt-2">
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors shadow-md flex items-center gap-2"
+            className="px-6 py-2.5 rounded-xl bg-[#c59d6b] hover:bg-[#b58c5a] text-slate-950 font-bold text-xs transition-colors shadow-md flex items-center gap-2"
           >
             <CheckCircle2 className="w-4 h-4" />
             <span>ცვლილებების შენახვა</span>

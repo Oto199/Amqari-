@@ -14,6 +14,7 @@ import { AnalyticsView } from './components/views/AnalyticsView';
 import { SettingsView } from './components/views/SettingsView';
 import { EvaluationView } from './components/views/EvaluationView';
 import { Menu, X } from 'lucide-react';
+import amqariLogo from './assets/images/amqari logo.png';
 
 const AppLayout: React.FC = () => {
   const { page, isAuthenticated } = useApp();
@@ -55,9 +56,9 @@ const AppLayout: React.FC = () => {
     <div className="h-screen w-screen overflow-hidden flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased font-sans">
       {/* Mobile Header Bar */}
       <div className="md:hidden h-14 px-4 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-xs">
-            ამ
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-md p-0.5 border border-[#c59d6b]/30 bg-white dark:bg-slate-900 flex items-center justify-center shrink-0">
+            <img src={amqariLogo} alt="ამქარი" className="w-full h-full object-contain" />
           </div>
           <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white">
             ამქარი

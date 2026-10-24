@@ -101,6 +101,288 @@ async function startServer() {
   }
 
   let geminiPermissionDenied = false;
+  let rateLimitCooldownUntil = 0;
+  const extractionCache = new Map<string, any>();
+
+  // Real Conversational Gemini Agent with Context Retention & Deterministic Guardrails
+  app.post('/api/agent/chat', async (req, res) => {
+    const { text, history = [], catalogue = [], senderId } = req.body;
+
+    if (!text || typeof text !== 'string') {
+      return res.status(400).json({ success: false, error: 'Text query is required' });
+    }
+
+    const serverStartTime = performance.now();
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.json({
+        success: false,
+        geminiAvailable: false,
+        requiresHumanReview: true,
+        validationStatus: 'human_review_required',
+        geminiStatus: 'Gemini Unavailable - No API Key',
+        error: 'GEMINI_API_KEY is not configured',
+        durationMs: Math.round(performance.now() - serverStartTime),
+      });
+    }
+
+    try {
+      const sanitizedCatalogue = Array.isArray(catalogue) && catalogue.length > 0
+        ? catalogue
+        : [
+            {
+              id: 'prod-3',
+              title: 'რეალ მადრიდი 2024/25 Home Kit (ოქროსფერი დეტალებით)',
+              price: 110,
+              minPrice: 90,
+              sizes: [
+                { size: 'S', stock: 1 },
+                { size: 'M', stock: 2 },
+                { size: 'L', stock: 0 },
+                { size: 'XL', stock: 4 },
+              ],
+            },
+            {
+              id: 'prod-1',
+              title: 'საქართველოს ნაკრები 2024 (კვარაცხელია #7)',
+              price: 85,
+              minPrice: 65,
+              sizes: [
+                { size: 'S', stock: 4 },
+                { size: 'M', stock: 0 },
+                { size: 'L', stock: 5 },
+                { size: 'XL', stock: 2 },
+              ],
+            },
+            {
+              id: 'prod-2',
+              title: 'დინამო თბილისი Vintage 1981',
+              price: 95,
+              minPrice: 75,
+              sizes: [
+                { size: 'M', stock: 3 },
+                { size: 'L', stock: 4 },
+                { size: 'XL', stock: 1 },
+              ],
+            },
+            {
+              id: 'prod-4',
+              title: 'ბარსელონა 2024/25 Home Kit',
+              price: 105,
+              minPrice: 85,
+              sizes: [
+                { size: 'S', stock: 2 },
+                { size: 'M', stock: 3 },
+                { size: 'L', stock: 2 },
+                { size: 'XL', stock: 0 },
+              ],
+            },
+          ];
+
+      const systemInstruction = `You are "ამქარი" (Amqari), an autonomous AI sales assistant for an e-commerce sportswear store in Georgia.
+You communicate naturally, concisely, and politely in Georgian.
+
+Store Catalogue & Inventory:
+${JSON.stringify(sanitizedCatalogue, null, 2)}
+
+Strict Business Rules:
+1. CONVERSATION CONTEXT & FOLLOW-UPS:
+   - Use the prior conversation history to track the product, requested size, and previous negotiations.
+   - For follow-up messages (e.g. "80 lardad viyidi" or "კარგი, 90 ლარად ავიღებ"), preserve the product and size from earlier turns.
+   - Understand Georgian written in either Georgian script or Latin transliteration (e.g. "80 lardad viyidi" means "80 ლარად ვიყიდი" -> 80 GEL offer).
+2. STRICT PRICE FLOOR:
+   - "price" is list price. "minPrice" is the STRICT MINIMUM AUTHORIZED PRICE.
+   - NEVER accept an offer below minPrice.
+   - If customer offers < minPrice (e.g. 10 GEL or 80 GEL when minPrice is 90 GEL):
+     * Do NOT agree. Counter-offer politely at minPrice (e.g. 90 GEL).
+   - If customer offers >= minPrice or accepts your counter-offer (e.g. "კარგი, 90 ლარად ავიღებ"):
+     * Accept warmly and ask for delivery details (name, phone, address) to finalize the order.
+3. INVENTORY CHECK:
+   - If requested size has 0 stock, explain it is out of stock and offer available sizes.
+   - If in stock, confirm availability.
+4. AMBIGUOUS QUERIES:
+   - If customer's question is ambiguous, ask a natural clarifying question rather than guessing.
+5. NATURAL HUMAN TONE:
+   - Do NOT repeat rigid robotic product descriptions or greetings in ongoing conversations. Be concise and natural like a real shop manager.
+
+Response Schema:
+You MUST return valid JSON adhering strictly to:
+{
+  "productId": string or null,
+  "size": string or null,
+  "offer": number or null,
+  "intent": string,
+  "reply": string
+}`;
+
+      const contents: any[] = [];
+      if (Array.isArray(history)) {
+        for (const h of history) {
+          if (h && h.text && h.role) {
+            contents.push({
+              role: h.role === 'assistant' ? 'model' : 'user',
+              parts: [{ text: String(h.text) }],
+            });
+          }
+        }
+      }
+      contents.push({
+        role: 'user',
+        parts: [{ text }],
+      });
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.1-flash-lite',
+        contents,
+        config: {
+          systemInstruction,
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              productId: {
+                type: Type.STRING,
+                description: 'ID of matched product (e.g. prod-3) or null.',
+              },
+              size: {
+                type: Type.STRING,
+                description: 'Matched size (e.g. XL, M, L) or null.',
+              },
+              offer: {
+                type: Type.NUMBER,
+                description: 'Price offered in GEL by customer or null.',
+              },
+              intent: {
+                type: Type.STRING,
+                description: 'Customer intent, e.g. negotiation, purchase_confirmed, inquiry.',
+              },
+              reply: {
+                type: Type.STRING,
+                description: 'Natural Georgian response to customer.',
+              },
+            },
+            required: ['intent', 'reply'],
+          },
+        },
+      });
+
+      let parsed: any = {};
+      try {
+        parsed = JSON.parse(response.text || '{}');
+      } catch (e) {
+        parsed = { reply: response.text, intent: 'conversation' };
+      }
+
+      // --- DETERMINISTIC VALIDATION LAYER ---
+      let matchedProduct = sanitizedCatalogue.find((p) => p.id === parsed.productId);
+      if (!matchedProduct && parsed.productId) {
+        matchedProduct = sanitizedCatalogue.find((p) =>
+          p.title.toLowerCase().includes(String(parsed.productId).toLowerCase())
+        );
+      }
+      if (!matchedProduct) {
+        matchedProduct = sanitizedCatalogue.find((p) =>
+          text.toLowerCase().includes(p.title.toLowerCase().split(' ')[0])
+        );
+      }
+      if (!matchedProduct && history.length > 0) {
+        const fullHistory = history.map((h: any) => h.text).join(' ');
+        matchedProduct = sanitizedCatalogue.find((p) =>
+          fullHistory.toLowerCase().includes(p.title.toLowerCase().split(' ')[0])
+        );
+      }
+      if (!matchedProduct) {
+        // Default to Real Madrid as primary showcase
+        matchedProduct = sanitizedCatalogue.find((p) => p.id === 'prod-3') || sanitizedCatalogue[0];
+      }
+
+      const targetSize = parsed.size ? String(parsed.size).toUpperCase() : 'XL';
+      const sizeObj = matchedProduct?.sizes?.find(
+        (s: any) => s.size.toUpperCase() === targetSize
+      );
+      const stock = sizeObj ? sizeObj.stock : 0;
+      const floorPrice = matchedProduct?.minPrice ?? 90;
+      const customerOffer = typeof parsed.offer === 'number' ? parsed.offer : null;
+
+      let validationStatus: 'passed' | 'regenerated' = 'passed';
+
+      // Check for price guardrail violations: did Gemini agree to an offer below minPrice?
+      const replyLower = String(parsed.reply || '').toLowerCase();
+      const acceptSignals = ['თანახმა ვარ', 'შევთანხმდით', 'მოგცემთ', 'გამოგიგზავნით ' + customerOffer];
+      const isAcceptingBelowFloor =
+        customerOffer !== null &&
+        customerOffer < floorPrice &&
+        acceptSignals.some((sig) => replyLower.includes(sig));
+
+      if (isAcceptingBelowFloor) {
+        console.info('[AI Guardrail] Gemini accepted price below minPrice. Triggering constrained regeneration...');
+        validationStatus = 'regenerated';
+        const correctiveContents = [
+          ...contents,
+          { role: 'model', parts: [{ text: response.text || '' }] },
+          {
+            role: 'user',
+            parts: [
+              {
+                text: `CORRECTION REQUIRED: Customer offered ${customerOffer} GEL, which is STRICTLY BELOW the minimum authorized price (${floorPrice} GEL). You MUST NOT agree to ${customerOffer} GEL. Counter-offer strictly at ${floorPrice} GEL in natural Georgian.`,
+              },
+            ],
+          },
+        ];
+
+        const regen = await ai.models.generateContent({
+          model: 'gemini-3.1-flash-lite',
+          contents: correctiveContents,
+          config: {
+            systemInstruction,
+            responseMimeType: 'application/json',
+          },
+        });
+
+        try {
+          const regenParsed = JSON.parse(regen.text || '{}');
+          if (regenParsed.reply) {
+            parsed.reply = regenParsed.reply;
+            parsed.intent = regenParsed.intent || parsed.intent;
+          }
+        } catch (_) {}
+      }
+
+      const serverDurationMs = Math.round(performance.now() - serverStartTime);
+
+      return res.json({
+        success: true,
+        geminiAvailable: true,
+        requiresHumanReview: false,
+        validationStatus,
+        geminiStatus: 'Gemini 3.1 Flash Lite - Live Inference',
+        structured: {
+          productId: matchedProduct?.id || parsed.productId || 'prod-3',
+          productTitle: matchedProduct?.title || 'რეალ მადრიდი 2024/25 Home Kit',
+          size: targetSize,
+          stock,
+          offer: customerOffer,
+          price: matchedProduct?.price ?? 110,
+          minPrice: floorPrice,
+          intent: parsed.intent || 'negotiation',
+          reply: parsed.reply,
+        },
+        durationMs: serverDurationMs,
+      });
+    } catch (err: any) {
+      console.info('[AI Agent] Gemini conversation turn error:', err?.message || err);
+      const serverDurationMs = Math.round(performance.now() - serverStartTime);
+      return res.json({
+        success: false,
+        geminiAvailable: false,
+        requiresHumanReview: true,
+        validationStatus: 'human_review_required',
+        geminiStatus: 'Gemini Unavailable - Human Review Required',
+        error: err?.message || 'Gemini inference failed',
+        durationMs: serverDurationMs,
+      });
+    }
+  });
 
   // Secure Server-Side Gemini Extraction Pipeline
   app.post('/api/agent/extract', async (req, res) => {
@@ -111,21 +393,32 @@ async function startServer() {
     }
 
     const serverStartTime = performance.now();
+    const cacheKey = text.trim().toLowerCase();
 
-    // If key is not configured or permission was previously denied (403), use deterministic engine directly
-    if (!process.env.GEMINI_API_KEY || geminiPermissionDenied) {
-      return res.json(
-        parseGeorgianMessage(
-          text,
-          serverStartTime,
-          geminiPermissionDenied ? 'deterministic_georgian_engine' : 'rule_fallback_no_key'
-        )
+    // Check fast in-memory cache first to save quota and provide 0ms latency
+    if (extractionCache.has(cacheKey)) {
+      const cached = extractionCache.get(cacheKey);
+      return res.json({
+        ...cached,
+        durationMs: Math.round(performance.now() - serverStartTime),
+      });
+    }
+
+    const isCooldownActive = Date.now() < rateLimitCooldownUntil;
+
+    // If key is not configured, permission was restricted (403), or currently in rate-limit cooldown (429), use deterministic engine directly
+    if (!process.env.GEMINI_API_KEY || geminiPermissionDenied || isCooldownActive) {
+      const fallbackResult = parseGeorgianMessage(
+        text,
+        serverStartTime,
+        'deterministic_georgian_engine'
       );
+      return res.json(fallbackResult);
     }
 
     try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
+      const geminiCall = ai.models.generateContent({
+        model: 'gemini-3.1-flash-lite',
         contents: `Analyze this Georgian customer message for an athletic jersey store: "${text}".
 Extract:
 1. productQuery: The football jersey team or player mentioned in Georgian or English (e.g. "რეალ მადრიდი", "საქართველოს ნაკრები", "დინამო თბილისი", "ბარსელონა"). Return null if not identified.
@@ -160,10 +453,16 @@ Extract:
         },
       });
 
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('GEMINI_TIMEOUT')), 2500)
+      );
+
+      const response = await Promise.race([geminiCall, timeoutPromise]);
+
       const parsed = JSON.parse(response.text || '{}');
       const serverDurationMs = Math.round(performance.now() - serverStartTime);
 
-      return res.json({
+      const resultPayload = {
         success: true,
         extractionSource: 'gemini-3.8-flash',
         geminiAvailable: true,
@@ -175,8 +474,26 @@ Extract:
         },
         durationMs: serverDurationMs,
         source: 'gemini-3.8-flash',
-      });
+      };
+
+      // Store in memory cache
+      extractionCache.set(cacheKey, resultPayload);
+
+      return res.json(resultPayload);
     } catch (err: any) {
+      // Check if error is timeout
+      const isTimeout = err?.message === 'GEMINI_TIMEOUT';
+
+      // Check if error is rate limited / 429 / quota exceeded
+      const isRateLimited =
+        isTimeout ||
+        err?.status === 429 ||
+        err?.error?.code === 429 ||
+        String(err?.message || '').includes('429') ||
+        String(err?.message || '').includes('RESOURCE_EXHAUSTED') ||
+        String(err?.message || '').includes('quota') ||
+        String(err).includes('RESOURCE_EXHAUSTED');
+
       // Check if error is permission denied / 403
       const isPermissionDenied =
         err?.status === 403 ||
@@ -186,16 +503,20 @@ Extract:
         String(err?.message || '').includes('403') ||
         String(err).includes('PERMISSION_DENIED');
 
-      if (isPermissionDenied) {
+      if (isRateLimited) {
+        // Enforce 20s cooldown so we do not repeatedly spam the rate-limited API
+        rateLimitCooldownUntil = Date.now() + 20000;
+        console.info('[AI Agent] Gemini rate limit/timeout active; serving via high-precision deterministic Georgian engine for 20s.');
+      } else if (isPermissionDenied) {
         geminiPermissionDenied = true;
-        console.info('[AI Agent] Note: Gemini API permission restricted (HTTP 403: PERMISSION_DENIED). Seamlessly utilizing local deterministic Georgian extraction engine.');
+        console.info('[AI Agent] Gemini API permission restricted (403); serving via deterministic Georgian engine.');
       } else {
-        console.warn('[AI Agent] Gemini call failed, utilizing local deterministic extraction:', err?.message || err);
+        console.info('[AI Agent] Gemini call fallback to deterministic Georgian engine:', err?.message || 'Unknown status');
       }
 
-      return res.json(
-        parseGeorgianMessage(text, serverStartTime, 'deterministic_georgian_engine')
-      );
+      const fallbackResult = parseGeorgianMessage(text, serverStartTime, 'deterministic_georgian_engine');
+      extractionCache.set(cacheKey, fallbackResult);
+      return res.json(fallbackResult);
     }
   });
 

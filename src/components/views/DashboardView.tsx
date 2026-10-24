@@ -99,7 +99,7 @@ export const DashboardView: React.FC = () => {
             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
               48
             </span>
-            <div className="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
+            <div className="flex items-center gap-1.5 text-[11px] text-[#c59d6b] mt-1 font-medium">
               <ArrowUpRight className="w-3.5 h-3.5" />
               <span>+18% გუშინდელთან</span>
             </div>
@@ -110,13 +110,13 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 rounded-xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/60 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
             <span className="text-xs font-medium">შექმნილი შეკვეთები</span>
-            <ShoppingBag className="w-4 h-4 text-emerald-500" />
+            <ShoppingBag className="w-4 h-4 text-[#c59d6b]" />
           </div>
           <div className="mt-3">
             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
               {orders.length + 9}
             </span>
-            <div className="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
+            <div className="flex items-center gap-1.5 text-[11px] text-[#c59d6b] mt-1 font-medium">
               <ArrowUpRight className="w-3.5 h-3.5" />
               <span>კონვერსია: 29.2%</span>
             </div>
@@ -127,7 +127,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 rounded-xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/60 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
             <span className="text-xs font-medium">გენერირებული თანხა</span>
-            <TrendingUp className="w-4 h-4 text-emerald-500" />
+            <TrendingUp className="w-4 h-4 text-[#c59d6b]" />
           </div>
           <div className="mt-3">
             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
@@ -142,12 +142,12 @@ export const DashboardView: React.FC = () => {
         {/* Card 4: Approval Requests */}
         <div className={`p-4 rounded-xl border shadow-xs flex flex-col justify-between transition-colors ${
           pendingApprovals.length > 0
-            ? 'border-amber-300 dark:border-amber-800/80 bg-amber-50/50 dark:bg-amber-950/20'
+            ? 'border-[#8b293e]/50 dark:border-[#8b293e]/60 bg-[#8b293e]/10 dark:bg-[#8b293e]/20'
             : 'border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/60'
         }`}>
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
             <span className="text-xs font-medium">დასტურის მოთხოვნები</span>
-            <AlertCircle className={`w-4 h-4 ${pendingApprovals.length > 0 ? 'text-amber-500' : 'text-slate-400'}`} />
+            <AlertCircle className={`w-4 h-4 ${pendingApprovals.length > 0 ? 'text-[#8b293e]' : 'text-slate-400'}`} />
           </div>
           <div className="mt-3">
             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
@@ -157,12 +157,12 @@ export const DashboardView: React.FC = () => {
               {pendingApprovals.length > 0 ? (
                 <button
                   onClick={() => setPage('approvals')}
-                  className="text-amber-700 dark:text-amber-400 font-semibold hover:underline flex items-center gap-1"
+                  className="text-[#8b293e] dark:text-[#f7c2cb] font-semibold hover:underline flex items-center gap-1"
                 >
                   გადასვლა დასტურზე <ArrowUpRight className="w-3 h-3" />
                 </button>
               ) : (
-                <span className="text-emerald-600 dark:text-emerald-400">ყველა დამუშავებულია</span>
+                <span className="text-[#c59d6b]">ყველა დამუშავებულია</span>
               )}
             </div>
           </div>
@@ -172,7 +172,7 @@ export const DashboardView: React.FC = () => {
         <div className="p-4 rounded-xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/60 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
             <span className="text-xs font-medium">პასუხის სისწრაფე</span>
-            <Clock className="w-4 h-4 text-emerald-500" />
+            <Clock className="w-4 h-4 text-[#c59d6b]" />
           </div>
           <div className="mt-3">
             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
@@ -200,7 +200,7 @@ export const DashboardView: React.FC = () => {
             </div>
             <div className="flex items-center gap-4 text-xs">
               <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
-                <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#c59d6b]" />
                 შეკვეთები
               </span>
             </div>
@@ -218,7 +218,7 @@ export const DashboardView: React.FC = () => {
                   </div>
                   <div
                     style={{ height: `${heightPct}%` }}
-                    className="w-full max-w-[48px] rounded-t-md bg-emerald-500/80 group-hover:bg-emerald-500 transition-all duration-200 relative"
+                    className="w-full max-w-[48px] rounded-t-md bg-[#c59d6b]/80 group-hover:bg-[#c59d6b] transition-all duration-200 relative"
                   />
                   <span className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2">
                     {d.label}
@@ -230,7 +230,7 @@ export const DashboardView: React.FC = () => {
 
           <div className="pt-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
             <span>სულ კვირაში: <strong className="text-slate-900 dark:text-white tabular-nums">171 შეკვეთა</strong></span>
-            <span>ჯამური შემოსავალი: <strong className="text-emerald-600 dark:text-emerald-400 tabular-nums">13,970 ₾</strong></span>
+            <span>ჯამური შემოსავალი: <strong className="text-[#c59d6b] tabular-nums">13,970 ₾</strong></span>
           </div>
         </div>
 
@@ -247,14 +247,14 @@ export const DashboardView: React.FC = () => {
             {/* Visual ratio bar */}
             <div className="mt-6 space-y-3">
               <div className="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
-                <div style={{ width: '91%' }} className="bg-emerald-500 h-full" title="AI ავტონომიური: 91%" />
-                <div style={{ width: '9%' }} className="bg-amber-500 h-full" title="ადამიანი: 9%" />
+                <div style={{ width: '91%' }} className="bg-[#c59d6b] h-full" title="AI ავტონომიური: 91%" />
+                <div style={{ width: '9%' }} className="bg-[#8b293e] h-full" title="ადამიანი: 9%" />
               </div>
 
               <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
-                    <Bot className="w-4 h-4 text-emerald-500" />
+                    <Bot className="w-4 h-4 text-[#c59d6b]" />
                     <span>AI ავტონომიურად დამუშავებული</span>
                   </div>
                   <span className="font-bold text-slate-900 dark:text-white tabular-nums">91.4%</span>
@@ -262,7 +262,7 @@ export const DashboardView: React.FC = () => {
 
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium">
-                    <User className="w-4 h-4 text-amber-500" />
+                    <User className="w-4 h-4 text-[#8b293e]" />
                     <span>ადამიანის ჩარევა (ფასდაკლების ლიმიტი)</span>
                   </div>
                   <span className="font-bold text-slate-900 dark:text-white tabular-nums">8.6%</span>
@@ -272,7 +272,7 @@ export const DashboardView: React.FC = () => {
 
             <div className="mt-8 p-3.5 rounded-lg border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 space-y-1">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-900 dark:text-white">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+                <Sparkles className="w-3.5 h-3.5 text-[#c59d6b]" />
                 <span>დაზოგილი დრო</span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400">
@@ -306,7 +306,7 @@ export const DashboardView: React.FC = () => {
             </div>
             <button
               onClick={() => setPage('inbox')}
-              className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-[#c59d6b] hover:text-[#b38a56] hover:underline flex items-center gap-1"
             >
               სრულ ინბოქსში გადასვლა <ArrowUpRight className="w-3 h-3" />
             </button>
@@ -349,11 +349,11 @@ export const DashboardView: React.FC = () => {
                     {conv.lastMessage.timestamp}
                   </span>
                   {conv.status === 'pending_approval' ? (
-                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[#8b293e]/15 text-[#8b293e] dark:bg-[#8b293e]/30 dark:text-[#f7c2cb]">
                       საჭიროებს დასტურს
                     </span>
                   ) : conv.orderId ? (
-                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                    <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md bg-[#c59d6b]/15 text-[#c59d6b] dark:bg-[#c59d6b]/25 dark:text-[#c59d6b]">
                       შეკვეთა #{conv.orderId}
                     </span>
                   ) : (
@@ -380,7 +380,7 @@ export const DashboardView: React.FC = () => {
             </div>
             <button
               onClick={() => setPage('products')}
-              className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-[#c59d6b] hover:text-[#b38a56] hover:underline flex items-center gap-1"
             >
               მართვა <ArrowUpRight className="w-3 h-3" />
             </button>
@@ -417,12 +417,12 @@ export const DashboardView: React.FC = () => {
                   <p className="text-xs font-bold text-slate-900 dark:text-white tabular-nums">
                     {p.totalStock} ცალი
                   </p>
-                  <p className={`text-[10px] font-medium ${
+                  <p className={`text-[10px] font-semibold ${
                     p.status === 'out_of_stock'
-                      ? 'text-red-500'
+                      ? 'text-[#8b293e]'
                       : p.status === 'low_stock'
-                      ? 'text-amber-500'
-                      : 'text-emerald-500'
+                      ? 'text-[#c59d6b]'
+                      : 'text-[#c59d6b]'
                   }`}>
                     {p.status === 'out_of_stock'
                       ? 'ამოწურულია'
@@ -437,7 +437,7 @@ export const DashboardView: React.FC = () => {
 
           <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
             <span>სულ კატალოგში: <strong>{products.length} პროდუქტი</strong></span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+            <span className="text-[#c59d6b] font-medium">
               სინქრონიზებული
             </span>
           </div>

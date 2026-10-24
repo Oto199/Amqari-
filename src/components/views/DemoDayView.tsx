@@ -20,6 +20,7 @@ import {
   Send,
   Zap,
 } from 'lucide-react';
+import amqariLogo from '../../assets/images/amqari logo.png';
 
 interface InventoryItem {
   id: string;
@@ -285,18 +286,21 @@ export const DemoDayView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-full bg-slate-950 text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-full bg-slate-950 text-slate-100 flex flex-col selection:bg-[#c59d6b] selection:text-slate-950">
       {/* DEMO DAY HERO & HEADER */}
       <div className="border-b border-slate-800 bg-slate-900/70 backdrop-blur-md px-6 py-4 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-white text-base shadow-sm ring-2 ring-emerald-500/30">
-              ამ
+            <div className="w-10 h-10 rounded-xl p-1 bg-white border border-[#c59d6b]/30 flex items-center justify-center shrink-0 shadow-sm ring-2 ring-[#c59d6b]/30">
+              <img src={amqariLogo} alt="ამქარი" className="w-full h-full object-contain" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight text-white">ამქარი (Amqari)</h1>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950 border border-emerald-700/60 text-emerald-300">
+                <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-1.5">
+                  <span>ამქარი (Amqari)</span>
+                  <span className="w-2 h-2 rounded-full bg-[#c59d6b]" />
+                </h1>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#8b293e]/20 border border-[#8b293e]/40 text-[#f7c2cb]">
                   Demo Day Live Sandbox
                 </span>
               </div>
@@ -309,13 +313,13 @@ export const DemoDayView: React.FC = () => {
           {/* Quick Actions & Navigation Link to Full SaaS */}
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-950/80 text-xs text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#c59d6b] animate-pulse" />
               <span>Inference: <strong className="text-white font-mono tabular-nums">142ms</strong></span>
             </div>
 
             <button
               onClick={() => setPage('dashboard')}
-              className="px-3.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200 transition-colors flex items-center gap-1.5"
+              className="px-3.5 py-1.5 text-xs font-semibold rounded-lg border border-[#c59d6b]/40 bg-slate-800/80 hover:bg-slate-700 text-[#c59d6b] transition-colors flex items-center gap-1.5"
             >
               <span>სრული SaaS მენიუ</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -325,18 +329,18 @@ export const DemoDayView: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto p-6 space-y-6 flex-1 w-full">
-        {/* 6. METRICS STRIP (Required by prompt: Messages Processed, Orders Created, Approval Requests, Revenue Saved) */}
+        {/* 6. METRICS STRIP */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-400 text-xs">
               <span>Messages Processed</span>
-              <MessageSquare className="w-4 h-4 text-blue-400" />
+              <MessageSquare className="w-4 h-4 text-slate-400" />
             </div>
             <div className="mt-2">
               <p className="text-2xl font-bold text-white tabular-nums tracking-tight">
                 {metrics.messagesProcessed.toLocaleString()}
               </p>
-              <p className="text-[11px] text-emerald-400 mt-0.5 flex items-center gap-1">
+              <p className="text-[11px] text-[#c59d6b] mt-0.5 flex items-center gap-1">
                 <span>100% ავტონომიური ანალიზი</span>
               </p>
             </div>
@@ -345,10 +349,10 @@ export const DemoDayView: React.FC = () => {
           <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-400 text-xs">
               <span>Orders Created</span>
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <CheckCircle2 className="w-4 h-4 text-[#c59d6b]" />
             </div>
             <div className="mt-2">
-              <p className="text-2xl font-bold text-emerald-400 tabular-nums tracking-tight">
+              <p className="text-2xl font-bold text-[#c59d6b] tabular-nums tracking-tight">
                 {metrics.ordersCreated.toLocaleString()}
               </p>
               <p className="text-[11px] text-slate-400 mt-0.5">
@@ -360,7 +364,7 @@ export const DemoDayView: React.FC = () => {
           <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 shadow-xs flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-400 text-xs">
               <span>Approval Requests</span>
-              <AlertCircle className="w-4 h-4 text-amber-400" />
+              <AlertCircle className="w-4 h-4 text-[#8b293e]" />
             </div>
             <div className="mt-2">
               <p className="text-2xl font-bold text-amber-400 tabular-nums tracking-tight">
@@ -402,14 +406,14 @@ export const DemoDayView: React.FC = () => {
               <div
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all shrink-0 ${
                   activeStep >= s.step
-                    ? 'bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 font-medium'
+                    ? 'bg-[#c59d6b]/20 border border-[#c59d6b]/50 text-[#c59d6b] font-semibold'
                     : 'bg-slate-900/60 border border-slate-800 text-slate-500'
                 }`}
               >
                 <span
                   className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
                     activeStep >= s.step
-                      ? 'bg-emerald-500 text-white'
+                      ? 'bg-[#c59d6b] text-slate-950'
                       : 'bg-slate-800 text-slate-400'
                   }`}
                 >
@@ -432,7 +436,7 @@ export const DemoDayView: React.FC = () => {
             <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-5 space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-emerald-400" />
+                  <MessageSquare className="w-4 h-4 text-[#c59d6b]" />
                   <h2 className="text-sm font-bold text-white tracking-tight">
                     1. Customer Inbox (შემოსული შეტყობინება)
                   </h2>
@@ -450,11 +454,11 @@ export const DemoDayView: React.FC = () => {
                     <button
                       key={i}
                       onClick={() => handleSelectExample(ex)}
-                      className="px-2.5 py-1 text-[11px] rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 hover:border-emerald-500 text-slate-200 transition-colors text-left flex items-center gap-1.5"
+                      className="px-2.5 py-1 text-[11px] rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 hover:border-[#c59d6b] text-slate-200 transition-colors text-left flex items-center gap-1.5"
                     >
-                      <Zap className="w-3 h-3 text-emerald-400 shrink-0" />
+                      <Zap className="w-3 h-3 text-[#c59d6b] shrink-0" />
                       <span>{ex.title}</span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-900 text-emerald-400 font-mono">
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-900 text-[#c59d6b] font-mono">
                         {ex.badge}
                       </span>
                     </button>
@@ -477,7 +481,7 @@ export const DemoDayView: React.FC = () => {
                       setSentToDm(false);
                     }}
                     placeholder="ჩაწერეთ ნებისმიერი შეკითხვა ქართულად..."
-                    className="w-full px-3.5 py-2.5 text-xs bg-slate-950 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-hidden focus:border-emerald-500 transition-colors"
+                    className="w-full px-3.5 py-2.5 text-xs bg-slate-950 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-hidden focus:border-[#c59d6b] transition-colors"
                   />
                 </div>
               </div>
@@ -498,7 +502,7 @@ export const DemoDayView: React.FC = () => {
                 <button
                   onClick={handleRunAgent}
                   disabled={isProcessing}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors shadow-md flex items-center gap-2 disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-[#c59d6b] hover:bg-[#b38a56] text-slate-950 font-bold text-xs transition-colors shadow-md flex items-center gap-2 disabled:opacity-50"
                 >
                   {isProcessing ? (
                     <>
@@ -519,12 +523,12 @@ export const DemoDayView: React.FC = () => {
             <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-5 space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Bot className="w-4 h-4 text-emerald-400" />
+                  <Bot className="w-4 h-4 text-[#c59d6b]" />
                   <h2 className="text-sm font-bold text-white tracking-tight">
                     2. Agent Reasoning Panel (აზროვნების ანალიზი)
                   </h2>
                 </div>
-                <span className="text-[11px] text-emerald-400 font-mono">
+                <span className="text-[11px] text-[#c59d6b] font-mono">
                   {activeStep === 6 ? 'დასრულებულია (Ready)' : `ეტაპი ${activeStep}/6`}
                 </span>
               </div>
@@ -534,16 +538,16 @@ export const DemoDayView: React.FC = () => {
                 <div
                   className={`p-3 rounded-lg border transition-all flex items-start justify-between ${
                     activeStep >= 1
-                      ? 'border-emerald-500/40 bg-emerald-950/20 text-slate-200'
+                      ? 'border-[#c59d6b]/40 bg-[#c59d6b]/10 text-slate-200'
                       : 'border-slate-800 bg-slate-950 text-slate-500 opacity-60'
                   }`}
                 >
                   <div className="flex items-start gap-2.5">
-                    <span className="text-emerald-400 text-sm">✅</span>
+                    <span className="text-[#c59d6b] text-sm">✅</span>
                     <div>
                       <p className="font-semibold text-white">Product Identified</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
-                        ამოცნობილი პროდუქტი: <strong className="text-emerald-300">{analysis.product.name}</strong>
+                        ამოცნობილი პროდუქტი: <strong className="text-[#c59d6b]">{analysis.product.name}</strong>
                       </p>
                     </div>
                   </div>
@@ -554,16 +558,16 @@ export const DemoDayView: React.FC = () => {
                 <div
                   className={`p-3 rounded-lg border transition-all flex items-start justify-between ${
                     activeStep >= 2
-                      ? 'border-emerald-500/40 bg-emerald-950/20 text-slate-200'
+                      ? 'border-[#c59d6b]/40 bg-[#c59d6b]/10 text-slate-200'
                       : 'border-slate-800 bg-slate-950 text-slate-500 opacity-60'
                   }`}
                 >
                   <div className="flex items-start gap-2.5">
-                    <span className="text-emerald-400 text-sm">✅</span>
+                    <span className="text-[#c59d6b] text-sm">✅</span>
                     <div>
                       <p className="font-semibold text-white">Size Identified</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
-                        ამოცნობილი ზომა: <strong className="text-emerald-300">ზომა {analysis.size}</strong>
+                        ამოცნობილი ზომა: <strong className="text-[#c59d6b]">ზომა {analysis.size}</strong>
                       </p>
                     </div>
                   </div>
@@ -574,17 +578,17 @@ export const DemoDayView: React.FC = () => {
                 <div
                   className={`p-3 rounded-lg border transition-all flex items-start justify-between ${
                     activeStep >= 3
-                      ? 'border-emerald-500/40 bg-emerald-950/20 text-slate-200'
+                      ? 'border-[#c59d6b]/40 bg-[#c59d6b]/10 text-slate-200'
                       : 'border-slate-800 bg-slate-950 text-slate-500 opacity-60'
                   }`}
                 >
                   <div className="flex items-start gap-2.5">
-                    <span className="text-emerald-400 text-sm">✅</span>
+                    <span className="text-[#c59d6b] text-sm">✅</span>
                     <div>
                       <p className="font-semibold text-white">Customer Offer Detected</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
                         შეთავაზება: {analysis.offer !== null ? (
-                          <strong className="text-amber-400 tabular-nums">{analysis.offer} GEL</strong>
+                          <strong className="text-[#8b293e] dark:text-[#f7c2cb] tabular-nums">{analysis.offer} GEL</strong>
                         ) : (
                           <span className="text-slate-400">ფასდაკლების გარეშე (კატალოგის ფასის მოთხოვნა)</span>
                         )}
@@ -598,19 +602,19 @@ export const DemoDayView: React.FC = () => {
                 <div
                   className={`p-3 rounded-lg border transition-all flex items-start justify-between ${
                     activeStep >= 4
-                      ? 'border-emerald-500/40 bg-emerald-950/20 text-slate-200'
+                      ? 'border-[#c59d6b]/40 bg-[#c59d6b]/10 text-slate-200'
                       : 'border-slate-800 bg-slate-950 text-slate-500 opacity-60'
                   }`}
                 >
                   <div className="flex items-start gap-2.5">
-                    <span className="text-emerald-400 text-sm">✅</span>
+                    <span className="text-[#c59d6b] text-sm">✅</span>
                     <div>
                       <p className="font-semibold text-white">Inventory Checked</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
                         მარაგი ბაზაში: {analysis.isOutOfStock ? (
-                          <strong className="text-red-400">0 ცალი (ამოწურულია)</strong>
+                          <strong className="text-[#8b293e]">0 ცალი (ამოწურულია)</strong>
                         ) : (
-                          <strong className="text-emerald-400 tabular-nums">{analysis.stock} ცალი დარჩენილი</strong>
+                          <strong className="text-[#c59d6b] tabular-nums">{analysis.stock} ცალი დარჩენილი</strong>
                         )}
                       </p>
                     </div>
@@ -622,16 +626,16 @@ export const DemoDayView: React.FC = () => {
                 <div
                   className={`p-3 rounded-lg border transition-all flex items-start justify-between ${
                     activeStep >= 5
-                      ? 'border-emerald-500/40 bg-emerald-950/20 text-slate-200'
+                      ? 'border-[#c59d6b]/40 bg-[#c59d6b]/10 text-slate-200'
                       : 'border-slate-800 bg-slate-950 text-slate-500 opacity-60'
                   }`}
                 >
                   <div className="flex items-start gap-2.5">
-                    <span className="text-emerald-400 text-sm">✅</span>
+                    <span className="text-[#c59d6b] text-sm">✅</span>
                     <div>
                       <p className="font-semibold text-white">Pricing Rules Applied</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
-                        კატალოგი: <strong className="tabular-nums text-white">{analysis.price} GEL</strong> · მინიმალური ზღვარი: <strong className="tabular-nums text-emerald-300">{analysis.minPrice} GEL</strong>
+                        კატალოგი: <strong className="tabular-nums text-white">{analysis.price} GEL</strong> · მინიმალური ზღვარი: <strong className="tabular-nums text-[#8b293e] dark:text-[#f7c2cb]">{analysis.minPrice} GEL</strong>
                       </p>
                     </div>
                   </div>
@@ -642,23 +646,23 @@ export const DemoDayView: React.FC = () => {
                 <div
                   className={`p-3 rounded-lg border transition-all flex items-start justify-between ${
                     activeStep >= 6
-                      ? 'border-emerald-500/60 bg-emerald-950/30 text-slate-200'
+                      ? 'border-[#c59d6b]/60 bg-[#c59d6b]/20 text-slate-200'
                       : 'border-slate-800 bg-slate-950 text-slate-500 opacity-60'
                   }`}
                 >
                   <div className="flex items-start gap-2.5">
-                    <span className="text-emerald-400 text-sm">✅</span>
+                    <span className="text-[#c59d6b] text-sm">✅</span>
                     <div>
                       <p className="font-semibold text-white">Decision Made</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
                         ვერდიქტი: <strong className={
                           analysis.decision === 'Counter Offer'
-                            ? 'text-amber-400'
+                            ? 'text-[#8b293e] dark:text-[#f7c2cb]'
                             : analysis.decision === 'Out of Stock'
                             ? 'text-red-400'
                             : analysis.decision === 'Approval Required'
-                            ? 'text-purple-400'
-                            : 'text-emerald-400'
+                            ? 'text-[#8b293e] dark:text-[#f7c2cb]'
+                            : 'text-[#c59d6b]'
                         }>{analysis.decision}</strong>
                       </p>
                     </div>
@@ -671,11 +675,11 @@ export const DemoDayView: React.FC = () => {
 
           {/* RIGHT COLUMN: Inventory Panel, Decision Panel & Generated Georgian Reply */}
           <div className="lg:col-span-6 space-y-6">
-            {/* 3. INVENTORY PANEL (Required by prompt: რეალის მაისური M, Stock: 3, Price: 70 GEL, Minimum Price: 60 GEL) */}
+            {/* 3. INVENTORY PANEL */}
             <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-5 space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-emerald-400" />
+                  <Package className="w-4 h-4 text-[#c59d6b]" />
                   <h2 className="text-sm font-bold text-white tracking-tight">
                     3. Inventory Panel (ინვენტარის მართვის პანელი)
                   </h2>
@@ -700,13 +704,13 @@ export const DemoDayView: React.FC = () => {
                         key={item.id}
                         className={`transition-colors ${
                           analysis.product.id === item.id && analysis.size === item.size
-                            ? 'bg-emerald-950/40 text-white font-medium'
+                            ? 'bg-[#c59d6b]/15 text-white font-medium'
                             : 'hover:bg-slate-800/40 text-slate-300'
                         }`}
                       >
                         <td className="px-3 py-2.5 flex items-center gap-2">
                           {analysis.product.id === item.id && analysis.size === item.size && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#c59d6b]" />
                           )}
                           <span className="truncate max-w-[150px]">{item.name}</span>
                         </td>
@@ -723,12 +727,12 @@ export const DemoDayView: React.FC = () => {
                             >
                               -
                             </button>
-                            <span className={`font-mono font-bold tabular-nums ${item.stock === 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                            <span className={`font-mono font-bold tabular-nums ${item.stock === 0 ? 'text-[#8b293e]' : 'text-[#c59d6b]'}`}>
                               {item.stock}
                             </span>
                             <button
                               onClick={() => handleUpdateStock(item.id, 1)}
-                              className="text-slate-400 hover:text-emerald-400 px-1"
+                              className="text-slate-400 hover:text-[#c59d6b] px-1"
                               title="მარაგის გაზრდა"
                             >
                               +
@@ -738,7 +742,7 @@ export const DemoDayView: React.FC = () => {
                         <td className="px-3 py-2.5 text-right font-mono font-semibold tabular-nums text-white">
                           {item.price} GEL
                         </td>
-                        <td className="px-3 py-2.5 text-right font-mono font-semibold tabular-nums text-emerald-400">
+                        <td className="px-3 py-2.5 text-right font-mono font-semibold tabular-nums text-[#8b293e] dark:text-[#f7c2cb]">
                           {item.minPrice} GEL
                         </td>
                       </tr>
@@ -752,11 +756,11 @@ export const DemoDayView: React.FC = () => {
               </p>
             </div>
 
-            {/* 4. DECISION PANEL (Required by prompt: if offer < min: Counter Offer; if stock = 0: Out of Stock; otherwise: Accept) */}
+            {/* 4. DECISION PANEL */}
             <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-5 space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Calculator className="w-4 h-4 text-emerald-400" />
+                  <Calculator className="w-4 h-4 text-[#c59d6b]" />
                   <h2 className="text-sm font-bold text-white tracking-tight">
                     4. Decision Panel (გადაწყვეტილების პანელი)
                   </h2>
@@ -768,12 +772,12 @@ export const DemoDayView: React.FC = () => {
               <div
                 className={`p-4 rounded-xl border flex items-center justify-between ${
                   analysis.decision === 'Counter Offer'
-                    ? 'border-amber-500/60 bg-amber-950/30 text-amber-200'
+                    ? 'border-[#8b293e]/60 bg-[#8b293e]/20 text-[#f7c2cb]'
                     : analysis.decision === 'Out of Stock'
                     ? 'border-red-500/60 bg-red-950/30 text-red-200'
                     : analysis.decision === 'Approval Required'
-                    ? 'border-purple-500/60 bg-purple-950/30 text-purple-200'
-                    : 'border-emerald-500/60 bg-emerald-950/30 text-emerald-200'
+                    ? 'border-[#8b293e]/60 bg-[#8b293e]/30 text-[#f7c2cb]'
+                    : 'border-[#c59d6b]/60 bg-[#c59d6b]/20 text-[#c59d6b]'
                 }`}
               >
                 <div>
@@ -803,41 +807,41 @@ export const DemoDayView: React.FC = () => {
               <div className="grid grid-cols-3 gap-2 text-center text-xs">
                 <div className="p-2 rounded bg-slate-950 border border-slate-800">
                   <span className="text-[10px] text-slate-400">მყიდველის შეთავაზება</span>
-                  <p className="font-bold text-amber-400 font-mono mt-0.5">
+                  <p className="font-bold text-[#8b293e] dark:text-[#f7c2cb] font-mono mt-0.5">
                     {analysis.offer ? `${analysis.offer} GEL` : 'არ არის'}
                   </p>
                 </div>
                 <div className="p-2 rounded bg-slate-950 border border-slate-800">
                   <span className="text-[10px] text-slate-400">მინიმალური ფასი</span>
-                  <p className="font-bold text-emerald-400 font-mono mt-0.5">
+                  <p className="font-bold text-[#c59d6b] font-mono mt-0.5">
                     {analysis.minPrice} GEL
                   </p>
                 </div>
                 <div className="p-2 rounded bg-slate-950 border border-slate-800">
                   <span className="text-[10px] text-slate-400">დაცული მარჟა</span>
-                  <p className="font-bold text-purple-400 font-mono mt-0.5">
+                  <p className="font-bold text-[#c59d6b] font-mono mt-0.5">
                     {analysis.decision === 'Counter Offer' ? '+10 GEL' : 'სტანდარტული'}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* 5. GENERATED GEORGIAN REPLY (Required by prompt) */}
+            {/* 5. GENERATED GEORGIAN REPLY */}
             <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-5 space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                  <Sparkles className="w-4 h-4 text-[#c59d6b]" />
                   <h2 className="text-sm font-bold text-white tracking-tight">
                     5. Generated Georgian Reply (გენერირებული პასუხი)
                   </h2>
                 </div>
-                <span className="text-[10px] text-emerald-400 font-mono">100% Georgian NLP</span>
+                <span className="text-[10px] text-[#c59d6b] font-mono">100% Georgian NLP</span>
               </div>
 
               {/* Chat Bubble Presentation */}
               <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 relative">
                 <div className="flex items-center gap-2 pb-2 mb-2 border-b border-slate-900 text-[10px] text-slate-400">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <div className="w-2 h-2 rounded-full bg-[#c59d6b]" />
                   <span>ამქარი AI გაყიდვების აგენტი მომხმარებელს:</span>
                 </div>
 
@@ -846,8 +850,8 @@ export const DemoDayView: React.FC = () => {
                 </pre>
 
                 {sentToDm && (
-                  <div className="mt-3 p-2 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-300 text-[11px] flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <div className="mt-3 p-2 rounded-lg bg-[#c59d6b]/15 border border-[#c59d6b]/40 text-[#c59d6b] text-[11px] flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#c59d6b]" />
                     <span>შეტყობინება გაიგზავნა Instagram Direct-ში და შეკვეთა ინიცირებულია!</span>
                   </div>
                 )}
@@ -859,13 +863,13 @@ export const DemoDayView: React.FC = () => {
                   onClick={handleCopyReply}
                   className="px-3.5 py-2 rounded-lg border border-slate-700 hover:bg-slate-800 text-xs text-slate-300 font-medium transition-colors flex items-center gap-1.5"
                 >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? <Check className="w-3.5 h-3.5 text-[#c59d6b]" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copied ? 'დაკოპირდა!' : 'ტექსტის კოპირება'}</span>
                 </button>
 
                 <button
                   onClick={handleSimulateSend}
-                  className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors flex items-center gap-1.5 shadow-sm"
+                  className="px-4 py-2 rounded-lg bg-[#c59d6b] hover:bg-[#b38a56] text-slate-950 font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Instagram Direct-ში გაგზავნის სიმულაცია</span>

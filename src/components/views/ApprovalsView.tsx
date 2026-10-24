@@ -50,10 +50,10 @@ export const ApprovalsView: React.FC = () => {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-              <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+              <CheckCircle2 className="w-6 h-6 text-[#c59d6b]" />
               <span>ადამიანის თანხმობის ცენტრი (Human Approval Center)</span>
             </h1>
-            <span className="px-2.5 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-semibold bg-[#8b293e]/15 text-[#8b293e] dark:text-[#f7c2cb] border border-[#8b293e]/30">
               Demo Data
             </span>
           </div>
@@ -179,8 +179,8 @@ export const ApprovalsView: React.FC = () => {
                     {/* Agent Recommended Action */}
                     <td className="px-5 py-4">
                       <div className="space-y-1 max-w-sm">
-                        <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 font-semibold text-xs">
-                          <Sparkles className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        <div className="flex items-center gap-1.5 text-[#c59d6b] font-semibold text-xs">
+                          <Sparkles className="w-3.5 h-3.5 text-[#c59d6b] shrink-0" />
                           <span>{req.recommendedAction}</span>
                         </div>
                         <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
@@ -192,17 +192,17 @@ export const ApprovalsView: React.FC = () => {
                     {/* Status */}
                     <td className="px-5 py-4">
                       {req.status === 'pending' && (
-                        <span className="px-2 py-1 text-[11px] font-semibold rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300">
+                        <span className="px-2 py-1 text-[11px] font-semibold rounded-md bg-[#8b293e]/15 text-[#8b293e] dark:bg-[#8b293e]/30 dark:text-[#f7c2cb]">
                           განსახილველი
                         </span>
                       )}
                       {req.status === 'approved' && (
-                        <span className="px-2 py-1 text-[11px] font-semibold rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
+                        <span className="px-2 py-1 text-[11px] font-semibold rounded-md bg-[#c59d6b]/15 text-[#c59d6b] dark:bg-[#c59d6b]/30 dark:text-[#c59d6b]">
                           დამტკიცებული
                         </span>
                       )}
                       {req.status === 'countered' && (
-                        <span className="px-2 py-1 text-[11px] font-semibold rounded-md bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300">
+                        <span className="px-2 py-1 text-[11px] font-semibold rounded-md bg-[#c59d6b]/20 text-[#c59d6b] dark:text-[#c59d6b]">
                           კონტრშეთავაზება ({req.recommendedCounterOffer} ₾)
                         </span>
                       )}
@@ -220,7 +220,7 @@ export const ApprovalsView: React.FC = () => {
                           {/* Approve Button */}
                           <button
                             onClick={() => handleApproveRequest(req.id)}
-                            className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors flex items-center gap-1 shadow-xs"
+                            className="px-2.5 py-1.5 rounded-lg bg-[#c59d6b] hover:bg-[#b38a56] text-slate-950 font-bold text-xs transition-colors flex items-center gap-1 shadow-xs"
                             title="დადასტურება მოთხოვნილ ფასზე"
                           >
                             <Check className="w-3.5 h-3.5" />
@@ -250,7 +250,7 @@ export const ApprovalsView: React.FC = () => {
                             setSelectedConversationId(req.conversationId);
                             setPage('inbox');
                           }}
-                          className="text-xs text-slate-500 dark:text-slate-400 hover:text-emerald-500 flex items-center gap-1 justify-end ml-auto"
+                          className="text-xs text-slate-500 dark:text-slate-400 hover:text-[#c59d6b] flex items-center gap-1 justify-end ml-auto"
                         >
                           <MessageSquare className="w-3.5 h-3.5" />
                           <span>ჩათის ნახვა</span>
@@ -270,7 +270,7 @@ export const ApprovalsView: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-6 space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-emerald-500" />
+              <Sparkles className="w-4 h-4 text-[#c59d6b]" />
               <span>კონტრშეთავაზების გაგზავნა</span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -298,7 +298,7 @@ export const ApprovalsView: React.FC = () => {
               </button>
               <button
                 onClick={submitCounterOffer}
-                className="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+                className="px-4 py-2 text-xs font-bold rounded-lg bg-[#c59d6b] hover:bg-[#b38a56] text-slate-950 transition-colors"
               >
                 კონტრშეთავაზების გაგზავნა ჩათში
               </button>

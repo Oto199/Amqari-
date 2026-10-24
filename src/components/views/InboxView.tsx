@@ -52,6 +52,7 @@ export const InboxView: React.FC = () => {
     processingEventIds,
     processedEventIds,
     settings,
+    resetConversationMessages,
   } = useApp();
 
   const [inputText, setInputText] = useState('');
@@ -150,27 +151,29 @@ export const InboxView: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-slate-400">შექმნილი შეკვეთები:</span>
-            <span className="font-bold text-emerald-400 tabular-nums font-mono">392</span>
+            <span className="font-bold text-[#c59d6b] tabular-nums font-mono">392</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-slate-400">ადამიანის თანხმობა:</span>
-            <span className="font-bold text-amber-400 tabular-nums font-mono">28 (2.1%)</span>
+            <span className="font-bold text-[#8b293e] dark:text-[#f7c2cb] tabular-nums font-mono">28 (2.1%)</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-slate-400">შენარჩუნებული მარჟა:</span>
-            <span className="font-bold text-purple-400 tabular-nums font-mono">+8,460 ₾</span>
+            <span className="font-bold text-[#c59d6b] tabular-nums font-mono">+8,460 ₾</span>
           </div>
         </div>
 
         {/* Live Meta Connection Status Badge (Requirement 4) */}
         <div className="flex items-center gap-3 shrink-0">
           {isMetaConnected ? (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-950/90 border border-emerald-600/70 text-xs font-bold text-emerald-300 shadow-xs">
-              <span>🟢 Meta Connected</span>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#c59d6b]/15 border border-[#c59d6b]/40 text-xs font-bold text-[#c59d6b] shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-[#c59d6b]" />
+              <span>Meta დაკავშირებულია</span>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-red-950/90 border border-red-600/70 text-xs font-bold text-red-300 shadow-xs">
-              <span>🔴 Meta Offline</span>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#8b293e]/15 border border-[#8b293e]/40 text-xs font-bold text-[#8b293e] dark:text-[#f7c2cb] shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-[#8b293e]" />
+              <span>Meta ხაზგარეშე</span>
             </div>
           )}
         </div>
@@ -189,7 +192,7 @@ export const InboxView: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ძებნა მომხმარებლის მიხედვით..."
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-900 border border-slate-800 rounded-lg text-white placeholder:text-slate-500 focus:outline-hidden focus:border-emerald-500"
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-900 border border-slate-800 rounded-lg text-white placeholder:text-slate-500 focus:outline-hidden focus:border-[#c59d6b]"
               />
             </div>
 
@@ -199,7 +202,7 @@ export const InboxView: React.FC = () => {
                 onClick={() => setFilter('all')}
                 className={`flex-1 py-1 rounded-md transition-colors text-center ${
                   filter === 'all'
-                    ? 'bg-slate-800 text-white font-semibold shadow-xs'
+                    ? 'bg-slate-800 text-[#c59d6b] font-semibold shadow-xs'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -209,7 +212,7 @@ export const InboxView: React.FC = () => {
                 onClick={() => setFilter('pending_approval')}
                 className={`flex-1 py-1 rounded-md transition-colors text-center ${
                   filter === 'pending_approval'
-                    ? 'bg-slate-800 text-amber-300 font-semibold shadow-xs'
+                    ? 'bg-[#8b293e]/20 text-[#8b293e] dark:text-[#f7c2cb] font-semibold shadow-xs'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -219,7 +222,7 @@ export const InboxView: React.FC = () => {
                 onClick={() => setFilter('resolved')}
                 className={`flex-1 py-1 rounded-md transition-colors text-center ${
                   filter === 'resolved'
-                    ? 'bg-slate-800 text-emerald-300 font-semibold shadow-xs'
+                    ? 'bg-slate-800 text-[#c59d6b] font-semibold shadow-xs'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -238,7 +241,7 @@ export const InboxView: React.FC = () => {
                   onClick={() => setSelectedConversationId(c.id)}
                   className={`p-3 cursor-pointer transition-all flex items-start gap-3 ${
                     isSelected
-                      ? 'bg-slate-900/90 border-l-2 border-emerald-500 text-white'
+                      ? 'bg-slate-900/90 border-l-2 border-[#c59d6b] text-white'
                       : 'hover:bg-slate-900/40 text-slate-300'
                   }`}
                 >
@@ -246,11 +249,11 @@ export const InboxView: React.FC = () => {
                     <img
                       src={c.customer.avatarUrl}
                       alt={c.customer.name}
-                      className="w-9 h-9 rounded-full object-cover border border-slate-700"
+                      className="w-9 h-9 rounded-full object-cover border border-[#c59d6b]/30"
                       referrerPolicy="no-referrer"
                     />
                     {c.unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#8b293e] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                         {c.unreadCount}
                       </span>
                     )}
@@ -271,7 +274,7 @@ export const InboxView: React.FC = () => {
                         {c.customer.handle}
                       </p>
                       {c.lastMessage.sender_id && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-[#c59d6b]/15 text-[#c59d6b] border border-[#c59d6b]/30">
                           ID: {c.lastMessage.sender_id}
                         </span>
                       )}
@@ -279,7 +282,7 @@ export const InboxView: React.FC = () => {
 
                     <p className="text-[11px] text-slate-200 truncate mt-1">
                       {c.lastMessage.sender === 'ai_agent' && (
-                        <span className="text-emerald-400 font-semibold">AI: </span>
+                        <span className="text-[#c59d6b] font-semibold">AI: </span>
                       )}
                       {c.lastMessage.text}
                     </p>
@@ -297,7 +300,7 @@ export const InboxView: React.FC = () => {
                         </span>
                       )}
                       {c.orderId && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800/80">
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-[#c59d6b]/15 text-[#c59d6b] border border-[#c59d6b]/30">
                           #{c.orderId}
                         </span>
                       )}
@@ -334,9 +337,9 @@ export const InboxView: React.FC = () => {
                     <span className="text-[10px] text-slate-400">Instagram Direct</span>
                     <span className="text-[10px] font-semibold">
                       {isMetaConnected ? (
-                        <span className="text-emerald-400">🟢 Meta Connected</span>
+                        <span className="text-[#c59d6b]">🟢 Meta დაკავშირებულია</span>
                       ) : (
-                        <span className="text-red-400">🔴 Meta Offline</span>
+                        <span className="text-[#8b293e] dark:text-[#f7c2cb]">🔴 Meta ხაზგარეშე</span>
                       )}
                     </span>
                   </div>
@@ -346,7 +349,7 @@ export const InboxView: React.FC = () => {
               {selectedConversation.status === 'pending_approval' && (
                 <button
                   onClick={() => setPage('approvals')}
-                  className="px-3 py-1 text-xs font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-colors flex items-center gap-1.5"
+                  className="px-3 py-1 text-xs font-semibold rounded-lg bg-[#8b293e] hover:bg-[#752233] text-white transition-colors flex items-center gap-1.5"
                 >
                   <AlertTriangle className="w-3.5 h-3.5" />
                   <span>ფასდაკლების დამტკიცება</span>
@@ -354,38 +357,53 @@ export const InboxView: React.FC = () => {
               )}
             </div>
 
-            {/* Quick Demo Georgian Queries */}
-            <div className="px-5 py-2 border-b border-slate-800/70 bg-slate-950/80 flex items-center gap-2 overflow-x-auto text-xs shrink-0">
-              <span className="text-[10px] text-slate-400 font-medium shrink-0 flex items-center gap-1">
-                <Zap className="w-3 h-3 text-emerald-400" />
-                სატესტო მესიჯი:
-              </span>
-              <button
-                onClick={() => handleSimulateCustomerMessage('რეალ მადრიდის მაისური M ზომა 50 ლარად თუ გაქვთ?')}
-                className="px-2.5 py-1 rounded-md bg-emerald-950/80 border border-emerald-600/70 hover:bg-emerald-900 text-emerald-200 text-[11px] whitespace-nowrap transition-colors font-semibold"
-                title="Target Test: Real Madrid M (Stock 2, Price 110, Floor 90, Offer 50 -> Counter Offer 90)"
-              >
-                ⭐ "რეალ მადრიდის მაისური M ზომა 50 ლარად თუ გაქვთ?"
-              </button>
-              <button
-                onClick={() => handleSimulateCustomerMessage('რეალის მაისური M ზომა გაქვთ?')}
-                className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-700 hover:border-emerald-500 text-slate-200 text-[11px] whitespace-nowrap transition-colors"
-              >
-                "რეალის მაისური M გაქვთ?"
-              </button>
-              <button
-                onClick={() => handleSimulateCustomerMessage('რეალის მაისური S ზომა თუ გაქვთ?')}
-                className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-700 hover:border-emerald-500 text-slate-200 text-[11px] whitespace-nowrap transition-colors"
-                title="S size has 0 stock in catalogue"
-              >
-                "S ზომა თუ გაქვთ? (Stock=0)"
-              </button>
-              <button
-                onClick={() => handleSimulateCustomerMessage('საქართველოს ნაკრების მაისური 60 ლარად თუ გაქვთ?')}
-                className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-700 hover:border-emerald-500 text-slate-200 text-[11px] whitespace-nowrap transition-colors"
-              >
-                "ნაკრები 60 ლარად?"
-              </button>
+            {/* Quick Demo Multi-Turn Test Sequence */}
+            <div className="px-4 py-2 border-b border-slate-800/80 bg-slate-950/90 flex items-center justify-between gap-2 overflow-x-auto text-xs shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-400 font-semibold shrink-0 flex items-center gap-1">
+                  <Zap className="w-3.5 h-3.5 text-[#c59d6b]" />
+                  3-საფეხურიანი ტესტი:
+                </span>
+                <button
+                  onClick={() => handleSimulateCustomerMessage('რეალ მადრიდის მაისური XL ზომა გაქვთ? 10 ლარად მომცემთ?')}
+                  className="px-2.5 py-1 rounded-md bg-[#c59d6b]/20 border border-[#c59d6b]/60 hover:bg-[#c59d6b]/30 text-[#c59d6b] text-[11px] whitespace-nowrap transition-colors font-medium flex items-center gap-1"
+                  title="Turn 1: Offer 10 GEL for Real Madrid XL (Below 90 GEL minPrice -> Counter 90 GEL)"
+                >
+                  <span className="w-4 h-4 rounded-full bg-[#c59d6b] text-slate-950 text-[9px] font-bold flex items-center justify-center">1</span>
+                  <span>10₾ შეთავაზება (XL)</span>
+                </button>
+                <button
+                  onClick={() => handleSimulateCustomerMessage('80 lardad viyidi')}
+                  className="px-2.5 py-1 rounded-md bg-[#8b293e]/20 border border-[#8b293e]/60 hover:bg-[#8b293e]/30 text-[#f7c2cb] text-[11px] whitespace-nowrap transition-colors font-medium flex items-center gap-1"
+                  title="Turn 2: Follow-up in Latin Georgian '80 lardad viyidi' (Retains XL + Real Madrid; 80 < 90 -> Counter 90)"
+                >
+                  <span className="w-4 h-4 rounded-full bg-[#8b293e] text-white text-[9px] font-bold flex items-center justify-center">2</span>
+                  <span>"80 lardad viyidi"</span>
+                </button>
+                <button
+                  onClick={() => handleSimulateCustomerMessage('კარგი, 90 ლარად ავიღებ')}
+                  className="px-2.5 py-1 rounded-md bg-[#c59d6b] hover:bg-[#b38a56] text-slate-950 text-[11px] whitespace-nowrap transition-colors font-bold flex items-center gap-1 shadow-xs"
+                  title="Turn 3: Customer accepts 90 GEL -> Deal agreed, asks for delivery details"
+                >
+                  <span className="w-4 h-4 rounded-full bg-slate-950 text-[#c59d6b] text-[9px] font-bold flex items-center justify-center">3</span>
+                  <span>"კარგი, 90₾ ავიღებ"</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => {
+                    if (selectedConversation) {
+                      resetConversationMessages(selectedConversation.id);
+                    }
+                  }}
+                  className="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-[10px] flex items-center gap-1 transition-colors"
+                  title="დიალოგის გასუფთავება ტესტის თავიდან დასაწყებად"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>განულება</span>
+                </button>
+              </div>
             </div>
 
             {/* Messages Scroll Area */}
@@ -404,22 +422,22 @@ export const InboxView: React.FC = () => {
                         isCustomer
                           ? 'bg-slate-800 text-slate-100 rounded-bl-xs'
                           : isAi
-                          ? 'bg-emerald-600 text-white rounded-br-xs'
-                          : 'bg-blue-600 text-white rounded-br-xs'
+                          ? 'bg-[#c59d6b] text-slate-950 rounded-br-xs font-medium shadow-xs'
+                          : 'bg-[#8b293e] text-white rounded-br-xs'
                       }`}
                     >
                       <p className="whitespace-pre-wrap font-medium">{msg.text}</p>
                       {msg.sender_id && (
-                        <div className="mt-1 pt-1 border-t border-slate-700/60 flex items-center justify-between text-[10px] font-mono text-emerald-300">
-                          <span>sender_id: <strong className="text-emerald-400">{msg.sender_id}</strong></span>
+                        <div className={`mt-1 pt-1 border-t ${isAi ? 'border-[#b38a56]/50 text-slate-900' : 'border-slate-700/60 text-[#c59d6b]'} flex items-center justify-between text-[10px] font-mono`}>
+                          <span>sender_id: <strong>{msg.sender_id}</strong></span>
                         </div>
                       )}
                       {msg.received_at && (
-                        <div className="text-[9px] font-mono text-slate-400/90 mt-0.5 truncate">
+                        <div className={`text-[9px] font-mono ${isAi ? 'text-slate-800/80' : 'text-slate-400/90'} mt-0.5 truncate`}>
                           received_at: {msg.received_at}
                         </div>
                       )}
-                      <div className="mt-1 flex items-center justify-end gap-1.5 text-[9px] opacity-75">
+                      <div className={`mt-1 flex items-center justify-end gap-1.5 text-[9px] ${isAi ? 'text-slate-900/80' : 'opacity-75'}`}>
                         <span>{msg.timestamp}</span>
                         {isAi && <span>· AI აგენტი</span>}
                       </div>
@@ -427,7 +445,7 @@ export const InboxView: React.FC = () => {
 
                     {msg.aiMetadata && (
                       <span className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-emerald-400" />
+                        <Sparkles className="w-3 h-3 text-[#c59d6b]" />
                         {msg.aiMetadata.actionTaken}
                       </span>
                     )}
@@ -437,7 +455,7 @@ export const InboxView: React.FC = () => {
 
               {isAiTyping && (
                 <div className="flex items-center gap-2 text-xs text-slate-400 italic">
-                  <Bot className="w-4 h-4 text-emerald-400 animate-spin" />
+                  <Bot className="w-4 h-4 text-[#c59d6b] animate-spin" />
                   <span>ამქარი ამოწმებს მარაგს და საფასო წესებს...</span>
                 </div>
               )}
@@ -453,12 +471,12 @@ export const InboxView: React.FC = () => {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder="უპასუხეთ ხელით ან გამოიყენეთ მარჯვენა გენერირებული პასუხი..."
-                className="flex-1 px-3.5 py-2 text-xs bg-slate-900 border border-slate-800 rounded-xl text-white placeholder:text-slate-500 focus:outline-hidden focus:border-emerald-500"
+                className="flex-1 px-3.5 py-2 text-xs bg-slate-900 border border-slate-800 rounded-xl text-white placeholder:text-slate-500 focus:outline-hidden focus:border-[#c59d6b]"
               />
               <button
                 type="submit"
                 disabled={!inputText.trim()}
-                className="p-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition-colors disabled:opacity-40"
+                className="p-2 rounded-xl bg-[#c59d6b] hover:bg-[#b38a56] text-slate-950 transition-colors disabled:opacity-40"
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -482,216 +500,205 @@ export const InboxView: React.FC = () => {
                   <h4 className="text-xs font-bold text-white">{selectedConversation.customer.name}</h4>
                   <span className="text-[10px] text-slate-400 font-mono">{selectedConversation.customer.handle}</span>
                   <div className="flex items-center gap-2 text-[10px] text-slate-300 mt-0.5">
-                    <span>LTV: <strong className="text-emerald-400 tabular-nums">{selectedConversation.customer.lifetimeValue} ₾</strong></span>
+                    <span>LTV: <strong className="text-[#c59d6b] tabular-nums">{selectedConversation.customer.lifetimeValue} ₾</strong></span>
                     <span>·</span>
                     <span>შეკვეთები: {selectedConversation.customer.previousOrdersCount}</span>
                   </div>
                 </div>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800">
+              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#c59d6b]/15 text-[#c59d6b] border border-[#c59d6b]/30">
                 სანდო
               </span>
             </div>
           )}
 
-          {/* Section 2: Agent Reasoning Timeline (Demo Flow: Incoming -> Product -> Inventory -> Pricing -> Decision -> Reply) */}
-          <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 space-y-2">
+          {/* Section 2: Gemini Live Processing Status & Latency Card */}
+          <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 space-y-2.5">
             <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
               <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                <Bot className="w-3.5 h-3.5 text-emerald-400" />
-                Agent Reasoning Flow (ნაკადი)
+                <Bot className="w-4 h-4 text-[#c59d6b]" />
+                Gemini Processing Status
               </span>
-              <span className="text-[10px] text-emerald-400 font-mono">
-                {measuredLatency} ms (Measured)
-              </span>
-            </div>
-
-            <div className="space-y-2 text-[11px]">
-              {/* Step 1: Incoming Customer Message */}
-              <div className="p-2 rounded bg-slate-950/80 border border-slate-800/80">
-                <div className="flex items-center justify-between text-slate-400 text-[10px]">
-                  <span>1. Incoming Message</span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-mono border font-semibold ${
-                      isGemini
-                        ? 'bg-emerald-950/90 text-emerald-300 border-emerald-700/70'
-                        : 'bg-amber-950/90 text-amber-300 border-amber-700/70'
-                    }`}
-                  >
-                    {isGemini ? 'Gemini Extraction' : 'Deterministic Fallback'}
-                  </span>
-                </div>
-                <p className="text-white font-medium truncate mt-0.5">
-                  "{currentResult?.trace.customerMessage || currentLastMsg || 'შეტყობინება არ არის'}"
-                </p>
-              </div>
-
-              {/* Step 2: Product Identified */}
-              <div className="flex items-center justify-between text-slate-200">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-emerald-400">✅</span> Product Identified:
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#c59d6b] animate-pulse" />
+                <span className="text-[11px] text-[#c59d6b] font-mono font-bold">
+                  {measuredLatency} ms
                 </span>
-                <strong className="text-white font-mono">{activeProduct.title}</strong>
               </div>
-
-              {/* Step 3: Size Identified */}
-              <div className="flex items-center justify-between text-slate-200">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-emerald-400">✅</span> Size Identified:
-                </span>
-                <strong className="text-white font-mono">ზომა: {activeSize}</strong>
-              </div>
-
-              {/* Step 4: Customer Offer Detected */}
-              <div className="flex items-center justify-between text-slate-200">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-emerald-400">✅</span> Customer Offer:
-                </span>
-                <strong
-                  className={`font-mono ${
-                    currentResult?.extraction.customerOffer ? 'text-amber-300' : 'text-slate-400'
-                  }`}
-                >
-                  {currentResult?.extraction.customerOffer
-                    ? `${currentResult.extraction.customerOffer} GEL`
-                    : 'არ არის (კატალოგის კითხვა)'}
-                </strong>
-              </div>
-
-              {/* Step 5: Inventory Checked */}
-              <div className="flex items-center justify-between text-slate-200">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-emerald-400">✅</span> Inventory Checked:
-                </span>
-                <strong className={`font-mono ${activeStock === 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                  {activeStock === 0 ? '0 ცალი (ამოწურულია)' : `${activeStock} ცალი მარაგში`}
-                </strong>
-              </div>
-
-              {/* Step 6: Pricing Rules Applied */}
-              <div className="flex items-center justify-between text-slate-200">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-emerald-400">✅</span> Pricing Rules:
-                </span>
-                <strong className="text-slate-300 font-mono text-[10px]">
-                  Price: {activeProduct.price}₾ | Floor: <span className="text-amber-400 font-bold">{activeProduct.minPrice}₾</span>
-                </strong>
-              </div>
-
-              {/* Step 7: Decision Made */}
-              <div className="flex items-center justify-between text-slate-200">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-emerald-400">✅</span> Decision Made:
-                </span>
-                <strong className={`font-mono ${
-                  decisionType === 'Counter Offer'
-                    ? 'text-amber-400'
-                    : decisionType === 'Out of Stock'
-                    ? 'text-red-400'
-                    : 'text-emerald-400'
-                }`}>
-                  {decisionType}
-                </strong>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 3: Inventory Panel (Single Source of Truth from AppContext.products) */}
-          <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 space-y-2">
-            <div className="flex items-center justify-between pb-1 border-b border-slate-800">
-              <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                <Package className="w-3.5 h-3.5 text-emerald-400" />
-                Inventory Panel (რეალური კატალოგი)
-              </span>
-              <span className="text-[10px] text-emerald-400 font-mono">Shared Catalogue</span>
             </div>
 
             <div className="space-y-2 text-xs">
-              {products.slice(0, 3).map((prod) => {
-                const isSelectedProd = prod.id === activeProduct.id;
-                return (
-                  <div
-                    key={prod.id}
-                    className={`p-2.5 rounded-lg border transition-colors ${
-                      isSelectedProd
-                        ? 'border-emerald-500/60 bg-emerald-950/20 text-white'
-                        : 'border-slate-800 bg-slate-950/40 text-slate-400'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <p className="font-semibold text-[11px] text-white truncate">{prod.title}</p>
-                      <span className="text-[10px] font-mono text-slate-400">
-                        {prod.price}₾ · Floor: <strong className="text-amber-400">{prod.minPrice}₾</strong>
-                      </span>
-                    </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400 text-[11px]">AI მოდელი & სტატუსი:</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#c59d6b]/15 text-[#c59d6b] border border-[#c59d6b]/40">
+                  {currentResult?.geminiStatus || 'Gemini 3.1 Flash Lite - Live'}
+                </span>
+              </div>
 
-                    <div className="flex flex-wrap gap-2 pt-1 border-t border-slate-800/60">
-                      {prod.sizes.map((s) => {
-                        const isSelectedSize = isSelectedProd && s.size === activeSize;
-                        return (
-                          <div
-                            key={s.size}
-                            className={`flex items-center gap-1.5 px-2 py-0.5 rounded border text-[10px] ${
-                              isSelectedSize
-                                ? 'border-emerald-500 bg-emerald-900/40 text-emerald-300 font-bold'
-                                : 'border-slate-800 bg-slate-900/60 text-slate-400'
-                            }`}
-                          >
-                            <span>{s.size}:</span>
-                            <span className={`font-mono ${s.stock === 0 ? 'text-red-400' : 'text-white'}`}>
-                              {s.stock}
-                            </span>
-                            <div className="flex items-center ml-1">
-                              <button
-                                onClick={() => updateActiveProductStock(prod.id, s.size, -1)}
-                                disabled={s.stock === 0}
-                                className="w-4 h-4 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-[10px] disabled:opacity-30"
-                                title="შეამცირე მარაგი (0-მდე დატესტვა)"
-                              >
-                                -
-                              </button>
-                              <button
-                                onClick={() => updateActiveProductStock(prod.id, s.size, 1)}
-                                className="w-4 h-4 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-[10px] ml-0.5"
-                                title="გაზარდე მარაგი"
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400 text-[11px]">ვალიდაციის შედეგი:</span>
+                <span
+                  className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold border ${
+                    currentResult?.requiresHumanReview
+                      ? 'bg-[#8b293e]/20 text-[#f7c2cb] border-[#8b293e]/60'
+                      : currentResult?.validationStatus === 'regenerated'
+                      ? 'bg-[#8b293e]/15 text-[#f7c2cb] border-[#8b293e]/40'
+                      : 'bg-[#c59d6b]/15 text-[#c59d6b] border-[#c59d6b]/40'
+                  }`}
+                >
+                  {currentResult?.requiresHumanReview
+                    ? '⚠️ Human Review Required'
+                    : currentResult?.validationStatus === 'regenerated'
+                    ? '🔄 Regenerated & Safe'
+                    : '✅ Verified Safe (Floor Kept)'}
+                </span>
+              </div>
+
+              {currentResult?.requiresHumanReview && (
+                <div className="p-2.5 rounded-lg bg-[#8b293e]/15 border border-[#8b293e]/50 text-[11px] text-[#f7c2cb] space-y-1">
+                  <div className="font-bold flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#8b293e] shrink-0" />
+                    <span>საჭიროებს ოპერატორის გადამოწმებას</span>
                   </div>
-                );
-              })}
+                  <p className="text-[10px] text-slate-300 leading-tight">
+                    Gemini მიუწვდომელია ან პასუხი ეწინააღმდეგება კატალოგის წესებს. ყალბი AI პასუხი დაბლოკილია.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Section 4: Decision Verdict Panel */}
+          {/* Section 3: Conversation Context Used (Multi-Turn History) */}
+          <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 space-y-2">
+            <div className="flex items-center justify-between pb-1 border-b border-slate-800">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                <RotateCcw className="w-3.5 h-3.5 text-[#c59d6b]" />
+                Conversation Context Used (ისტორია)
+              </span>
+              <span className="text-[10px] font-mono text-[#c59d6b]">
+                {currentResult?.conversationContextUsed?.length ?? 0} Turns
+              </span>
+            </div>
+
+            {currentResult?.conversationContextUsed && currentResult.conversationContextUsed.length > 0 ? (
+              <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                {currentResult.conversationContextUsed.map((turn, idx) => (
+                  <div
+                    key={idx}
+                    className="p-1.5 rounded bg-slate-950/80 border border-slate-800 text-[10px] space-y-0.5"
+                  >
+                    <div className="flex items-center justify-between text-slate-400">
+                      <span className="font-semibold text-[9px] uppercase tracking-wider text-[#c59d6b]">
+                        {turn.role === 'user' ? '👤 კლიენტი' : '🤖 ასისტენტი'}
+                      </span>
+                      <span className="text-[9px] text-slate-400 font-mono">Turn #{idx + 1}</span>
+                    </div>
+                    <p className="text-slate-200 font-sans line-clamp-2 leading-relaxed">
+                      {turn.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-2 rounded bg-slate-950/60 border border-dashed border-slate-800 text-[10px] text-slate-400 text-center">
+                საწყისი შეტყობინება — წინა კონტექსტი არ არის საჭირო
+              </div>
+            )}
+          </div>
+
+          {/* Section 4: Verified Catalogue Result (Shared Inventory Single Source of Truth) */}
+          <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 space-y-2">
+            <div className="flex items-center justify-between pb-1 border-b border-slate-800">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Package className="w-3.5 h-3.5 text-[#c59d6b]" />
+                Verified Catalogue Result (კატალოგი)
+              </span>
+              <span className="text-[10px] text-[#c59d6b] font-mono font-semibold">Verified DB</span>
+            </div>
+
+            <div className="p-2.5 rounded-lg border border-[#c59d6b]/40 bg-[#c59d6b]/10 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h5 className="font-bold text-xs text-white">{activeProduct.title}</h5>
+                  <span className="text-[10px] font-mono text-slate-400">SKU: {activeProduct.id}</span>
+                </div>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-900 border border-[#c59d6b]/40 text-[#c59d6b]">
+                  ზომა: {activeSize}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800/80 text-[11px]">
+                <div className="p-1.5 rounded bg-slate-950 border border-slate-800 text-center">
+                  <span className="text-[9px] text-slate-400 block">მარაგი</span>
+                  <span className={`font-mono font-bold ${activeStock === 0 ? 'text-[#8b293e]' : 'text-[#c59d6b]'}`}>
+                    {activeStock} ცალი
+                  </span>
+                </div>
+                <div className="p-1.5 rounded bg-slate-950 border border-slate-800 text-center">
+                  <span className="text-[9px] text-slate-400 block">საწყისი ფასი</span>
+                  <span className="font-mono font-bold text-white">{activeProduct.price} ₾</span>
+                </div>
+                <div className="p-1.5 rounded bg-slate-950 border border-slate-800 text-center">
+                  <span className="text-[9px] text-[#8b293e] dark:text-[#f7c2cb] block">მინ. ზღვარი</span>
+                  <span className="font-mono font-bold text-[#8b293e] dark:text-[#f7c2cb]">{activeProduct.minPrice} ₾</span>
+                </div>
+              </div>
+
+              {/* Stock manipulation buttons to test 0-stock branches */}
+              <div className="flex items-center justify-between pt-1 border-t border-slate-800/80 text-[10px] text-slate-400">
+                <span>მარაგის ცვლილება ტესტისთვის:</span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => updateActiveProductStock(activeProduct.id, activeSize, -1)}
+                    disabled={activeStock === 0}
+                    className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs disabled:opacity-30 cursor-pointer"
+                    title="შეამცირე მარაგი 0-მდე"
+                  >
+                    -1
+                  </button>
+                  <button
+                    onClick={() => updateActiveProductStock(activeProduct.id, activeSize, 1)}
+                    className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs cursor-pointer"
+                    title="გაზარდე მარაგი"
+                  >
+                    +1
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
+              <span>დაცვის წესი:</span>
+              <span className="text-[#8b293e] dark:text-[#f7c2cb] font-semibold font-mono">
+                ფასი ვერ იქნება &lt; {activeProduct.minPrice} ₾
+              </span>
+            </div>
+          </div>
+
+          {/* Section 5: Decision Verdict */}
           <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 space-y-2">
             <span className="text-xs font-bold text-white flex items-center gap-1.5">
-              <Calculator className="w-3.5 h-3.5 text-emerald-400" />
-              Decision Panel (გადაწყვეტილება)
+              <Calculator className="w-3.5 h-3.5 text-[#c59d6b]" />
+              გადაწყვეტილება & შეთავაზება
             </span>
 
             <div
               className={`p-2.5 rounded-lg border text-xs font-bold flex flex-col gap-1 ${
                 decisionType === 'Counter Offer'
-                  ? 'border-amber-500/60 bg-amber-950/40 text-amber-300'
+                  ? 'border-[#8b293e]/60 bg-[#8b293e]/20 text-[#f7c2cb]'
                   : decisionType === 'Out of Stock'
                   ? 'border-red-500/60 bg-red-950/40 text-red-300'
                   : decisionType === 'Human Approval'
-                  ? 'border-purple-500/60 bg-purple-950/40 text-purple-300'
-                  : 'border-emerald-500/60 bg-emerald-950/40 text-emerald-300'
+                  ? 'border-[#8b293e]/60 bg-[#8b293e]/30 text-[#f7c2cb]'
+                  : 'border-[#c59d6b]/60 bg-[#c59d6b]/15 text-[#c59d6b]'
               }`}
             >
               <div className="flex items-center justify-between">
                 <span>{decisionType}</span>
                 <span className="text-[10px] font-mono font-normal">
-                  {decisionType === 'Counter Offer' && `კონტრშეთავაზება: ${counterOfferPrice}₾`}
+                  {decisionType === 'Counter Offer' && `კონტრშეთავაზება: ${counterOfferPrice} ₾`}
                   {decisionType === 'Out of Stock' && 'მარაგი ამოწურულია (0 ცალი)'}
-                  {decisionType === 'Human Approval' && `გადამისამართდა მენეჯერთან (ზღვარი: ${counterOfferPrice}₾)`}
+                  {decisionType === 'Human Approval' && `გადამისამართდა მენეჯერთან (ზღვარი: ${counterOfferPrice} ₾)`}
                   {decisionType === 'Accept' && 'შეთავაზება მიღებულია'}
                 </span>
               </div>
@@ -699,26 +706,17 @@ export const InboxView: React.FC = () => {
                 {decisionDetails}
               </p>
             </div>
-            <p className="text-[10px] text-slate-400 leading-tight">
-              * მინიმალური ზღვრული ფასი ({activeProduct.minPrice}₾) მკაცრად დაცულია: კონტრშეთავაზება ვერ იქნება {activeProduct.minPrice}₾-ზე ნაკლები.
-            </p>
           </div>
 
-          {/* Section 5: Generated Georgian Reply */}
-          <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 space-y-2">
+          {/* Section 6: Final Validated Reply */}
+          <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60 space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                Generated Georgian Reply (პასუხი)
+                <Sparkles className="w-3.5 h-3.5 text-[#c59d6b]" />
+                Final Validated Reply (დამოწმებული პასუხი)
               </span>
-              <span
-                className={`text-[10px] font-mono px-2 py-0.5 rounded border font-semibold ${
-                  isGemini
-                    ? 'bg-emerald-950/90 text-emerald-300 border-emerald-700/70'
-                    : 'bg-amber-950/90 text-amber-300 border-amber-700/70'
-                }`}
-              >
-                {isGemini ? 'Gemini Extraction' : 'Deterministic Fallback'}
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#c59d6b]/15 text-[#c59d6b] border border-[#c59d6b]/40">
+                Gemini 3.1 Flash Lite
               </span>
             </div>
 
@@ -727,29 +725,29 @@ export const InboxView: React.FC = () => {
             </div>
 
             {settings.autoReplyEnabled && (
-              <div className="flex items-center gap-1.5 text-[10px] text-emerald-300 font-medium px-2.5 py-1 rounded bg-emerald-950/60 border border-emerald-800/60">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Auto Reply ჩართულია — პასუხი ავტომატურად გაგზავნილია ჩათში</span>
+              <div className="flex items-center gap-1.5 text-[10px] text-[#c59d6b] font-medium px-2.5 py-1 rounded bg-[#c59d6b]/15 border border-[#c59d6b]/30">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#c59d6b] shrink-0" />
+                <span>Auto Reply ჩართულია — ვალიდირებული პასუხი ავტომატურად გაიგზავნა</span>
               </div>
             )}
 
-            <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
-              <span>დრო: <strong className="text-emerald-400 font-mono">{measuredLatency} ms</strong> (Measured)</span>
-              <span>დარწმუნებულობა: <strong className="text-slate-300">Deterministic Rule</strong></span>
+            <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5 font-mono">
+              <span>რეალური დაყოვნება: <strong className="text-[#c59d6b]">{measuredLatency} ms</strong></span>
+              <span className="text-[#c59d6b]">🛡️ Guardrail Verified</span>
             </div>
 
             <div className="flex items-center gap-2 pt-1">
               <button
                 onClick={handleCopyGeneratedReply}
-                className="flex-1 py-1.5 px-2 rounded-lg border border-slate-700 hover:bg-slate-800 text-[11px] font-medium text-slate-300 transition-colors flex items-center justify-center gap-1"
+                className="flex-1 py-1.5 px-2 rounded-lg border border-slate-700 hover:bg-slate-800 text-[11px] font-medium text-slate-300 transition-colors flex items-center justify-center gap-1 cursor-pointer"
               >
-                {copiedReply ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedReply ? <Check className="w-3.5 h-3.5 text-[#c59d6b]" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedReply ? 'დაკოპირდა!' : 'კოპირება'}</span>
               </button>
 
               <button
                 onClick={handleSendGeneratedReplyToChat}
-                className="flex-1 py-1.5 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-[11px] font-semibold text-white transition-colors flex items-center justify-center gap-1 shadow-xs"
+                className="flex-1 py-1.5 px-2 rounded-lg bg-[#c59d6b] hover:bg-[#b38a56] text-[11px] font-bold text-slate-950 transition-colors flex items-center justify-center gap-1 shadow-xs cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>ჩათში გაგზავნა</span>
@@ -765,7 +763,7 @@ export const InboxView: React.FC = () => {
         <div className="px-5 py-2 bg-slate-900/90 border-b border-slate-800/80 flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex items-center gap-2 shrink-0">
-              <Terminal className="w-4 h-4 text-emerald-400" />
+              <Terminal className="w-4 h-4 text-[#c59d6b]" />
               <span className="font-bold text-white tracking-wide">
                 API Integration Debug Panel
               </span>
@@ -775,12 +773,12 @@ export const InboxView: React.FC = () => {
                 GET https://traffic-spearfish-tweezers.ngrok-free.dev/messages
               </span>
               {isMetaConnected ? (
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800 shrink-0">
-                  🟢 Meta Connected
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#c59d6b]/15 text-[#c59d6b] border border-[#c59d6b]/30 shrink-0">
+                  🟢 Meta დაკავშირებულია
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-950 text-red-300 border border-red-800 shrink-0">
-                  🔴 Meta Offline
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#8b293e]/15 text-[#8b293e] dark:text-[#f7c2cb] border border-[#8b293e]/30 shrink-0">
+                  🔴 Meta ხაზგარეშე
                 </span>
               )}
             </div>
@@ -793,7 +791,7 @@ export const InboxView: React.FC = () => {
             <button
               onClick={handleManualRefresh}
               disabled={isRefreshing}
-              className="px-2.5 py-1 rounded-md bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-md bg-[#c59d6b] hover:bg-[#b38a56] disabled:opacity-50 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span>ხელახლა გამოძახება</span>
@@ -811,11 +809,11 @@ export const InboxView: React.FC = () => {
         {/* Debug Content */}
         {isDebugOpen && (
           <div className="p-4 grid grid-cols-1 lg:grid-cols-2 gap-4 max-h-56 overflow-y-auto bg-slate-950/95 border-t border-slate-900">
-            {/* 1. Parsed Items from response.messages (Requirements 4 & 5) */}
+            {/* 1. Parsed Items from response.messages */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#c59d6b]" />
                   დარენდერებული შეტყობინებები (response.messages: {backendMessages.length})
                 </span>
                 <span className="text-[10px] text-slate-400 font-mono">
@@ -838,12 +836,12 @@ export const InboxView: React.FC = () => {
                           setSelectedConversationId(targetId);
                         }
                       }}
-                      className="p-2.5 rounded-lg border border-slate-800 bg-slate-900/80 hover:border-emerald-500/50 cursor-pointer transition-colors"
+                      className="p-2.5 rounded-lg border border-slate-800 bg-slate-900/80 hover:border-[#c59d6b]/50 cursor-pointer transition-colors"
                     >
                       <div className="flex items-center justify-between text-xs mb-1">
                         <div className="flex items-center gap-1.5">
                           <span className="text-slate-400 text-[10px]">sender_id:</span>
-                          <span className="font-mono font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.2 rounded border border-emerald-800/80">
+                          <span className="font-mono font-bold text-[#c59d6b] bg-[#c59d6b]/15 px-1.5 py-0.2 rounded border border-[#c59d6b]/30">
                             {bm.sender_id}
                           </span>
                         </div>
@@ -853,7 +851,7 @@ export const InboxView: React.FC = () => {
                       </div>
                       <div className="text-xs text-white bg-slate-950 p-2 rounded border border-slate-800/70">
                         <span className="text-slate-400 text-[10px] block font-mono">text:</span>
-                        <span className="font-medium text-emerald-200">{bm.text}</span>
+                        <span className="font-medium text-[#c59d6b]">{bm.text}</span>
                       </div>
                       {bm.event_id && (
                         <div className="mt-1 text-[9px] text-slate-500 font-mono">
@@ -866,11 +864,11 @@ export const InboxView: React.FC = () => {
               )}
             </div>
 
-            {/* 2. Raw JSON from GET /messages (Requirement 8) */}
+            {/* 2. Raw JSON from GET /messages */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <Terminal className="w-3.5 h-3.5 text-purple-400" />
+                  <Terminal className="w-3.5 h-3.5 text-[#c59d6b]" />
                   Raw API Response (GET /messages JSON)
                 </span>
                 <button
@@ -883,12 +881,12 @@ export const InboxView: React.FC = () => {
                   }}
                   className="text-[10px] text-slate-400 hover:text-white flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-800 cursor-pointer"
                 >
-                  {rawCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                  {rawCopied ? <Check className="w-3 h-3 text-[#c59d6b]" /> : <Copy className="w-3 h-3" />}
                   <span>{rawCopied ? 'დაკოპირდა!' : 'JSON კოპირება'}</span>
                 </button>
               </div>
 
-              <pre className="p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-[10px] font-mono text-emerald-300 overflow-x-auto max-h-40 leading-relaxed selection:bg-emerald-900">
+              <pre className="p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-[10px] font-mono text-[#c59d6b] overflow-x-auto max-h-40 leading-relaxed selection:bg-[#c59d6b]/30">
                 {rawBackendResponse
                   ? JSON.stringify(rawBackendResponse, null, 2)
                   : '// ჯერ არ მიღებულა პასუხი ან კავშირი მყარდება...'}

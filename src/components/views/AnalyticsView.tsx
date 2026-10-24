@@ -37,7 +37,7 @@ export const AnalyticsView: React.FC = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-          <BarChart3 className="w-6 h-6 text-emerald-500" />
+          <BarChart3 className="w-6 h-6 text-[#c59d6b]" />
           <span>გაყიდვების და AI აგენტის ანალიტიკა</span>
         </h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -51,13 +51,13 @@ export const AnalyticsView: React.FC = () => {
         <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs">
             <span className="font-medium">ჯამური შემოსავალი (Revenue)</span>
-            <TrendingUp className="w-4 h-4 text-emerald-500" />
+            <TrendingUp className="w-4 h-4 text-[#c59d6b]" />
           </div>
           <div className="mt-3">
             <p className="text-3xl font-bold text-slate-900 dark:text-white tabular-nums tracking-tight">
               14,850 ₾
             </p>
-            <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 mt-1.5 font-semibold">
+            <div className="flex items-center gap-1.5 text-xs text-[#c59d6b] mt-1.5 font-semibold">
               <ArrowUpRight className="w-3.5 h-3.5" />
               <span>+28.4% წინა თვესთან</span>
             </div>
@@ -71,13 +71,13 @@ export const AnalyticsView: React.FC = () => {
         <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs">
             <span className="font-medium">კონვერსიის კოეფიციენტი (Conversion Rate)</span>
-            <Percent className="w-4 h-4 text-blue-500" />
+            <Percent className="w-4 h-4 text-[#8b293e]" />
           </div>
           <div className="mt-3">
             <p className="text-3xl font-bold text-slate-900 dark:text-white tabular-nums tracking-tight">
               28.6%
             </p>
-            <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 mt-1.5 font-semibold">
+            <div className="flex items-center gap-1.5 text-xs text-[#c59d6b] mt-1.5 font-semibold">
               <ArrowUpRight className="w-3.5 h-3.5" />
               <span>+6.2% ავტონომიური პასუხების შემდეგ</span>
             </div>
@@ -91,13 +91,13 @@ export const AnalyticsView: React.FC = () => {
         <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs">
             <span className="font-medium">საშუალო რეაგირების დრო (Avg Response Time)</span>
-            <Clock className="w-4 h-4 text-emerald-500" />
+            <Clock className="w-4 h-4 text-[#c59d6b]" />
           </div>
           <div className="mt-3">
             <p className="text-3xl font-bold text-slate-900 dark:text-white tabular-nums tracking-tight">
               1.4 წმ
             </p>
-            <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 mt-1.5 font-semibold">
+            <div className="flex items-center gap-1.5 text-xs text-[#c59d6b] mt-1.5 font-semibold">
               <span>99.8% პასუხი 3 წამზე ნაკლებში</span>
             </div>
             <p className="text-[11px] text-slate-400 mt-2">
@@ -110,13 +110,13 @@ export const AnalyticsView: React.FC = () => {
         <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs">
             <span className="font-medium">წარმატებული მოლაპარაკებები (Negotiations)</span>
-            <Sparkles className="w-4 h-4 text-purple-500" />
+            <Sparkles className="w-4 h-4 text-[#8b293e]" />
           </div>
           <div className="mt-3">
             <p className="text-3xl font-bold text-slate-900 dark:text-white tabular-nums tracking-tight">
               142 გარიგება
             </p>
-            <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 mt-1.5 font-semibold">
+            <div className="flex items-center gap-1.5 text-xs text-[#c59d6b] mt-1.5 font-semibold">
               <span>შენარჩუნებული მარჟა: 88.4%</span>
             </div>
             <p className="text-[11px] text-slate-400 mt-2">
@@ -148,13 +148,13 @@ export const AnalyticsView: React.FC = () => {
         <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs">
             <span className="font-medium">AI წარმატების კოეფიციენტი (AI Success Rate)</span>
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <ShieldCheck className="w-4 h-4 text-[#c59d6b]" />
           </div>
           <div className="mt-3">
-            <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tight">
+            <p className="text-3xl font-bold text-[#c59d6b] tabular-nums tracking-tight">
               96.8%
             </p>
-            <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 mt-1.5 font-semibold">
+            <div className="flex items-center gap-1.5 text-xs text-[#c59d6b] mt-1.5 font-semibold">
               <CheckCircle className="w-3.5 h-3.5" />
               <span>0% ჰალუცინაციის მაჩვენებელი</span>
             </div>
@@ -185,13 +185,13 @@ export const AnalyticsView: React.FC = () => {
                 <div className="flex-1 h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
                   <div
                     style={{ width: `${(h.messages / 90) * 100}%` }}
-                    className="bg-emerald-500 rounded-full h-full"
+                    className="bg-[#c59d6b] rounded-full h-full"
                   />
                 </div>
                 <span className="w-16 text-right font-bold text-slate-900 dark:text-white tabular-nums">
                   {h.messages} მესიჯი
                 </span>
-                <span className="w-16 text-right text-[11px] text-emerald-600 dark:text-emerald-400 font-medium tabular-nums">
+                <span className="w-16 text-right text-[11px] text-[#c59d6b] font-medium tabular-nums">
                   {h.aiHandledPct}% AI
                 </span>
               </div>
@@ -225,12 +225,12 @@ export const AnalyticsView: React.FC = () => {
                       style={{ width: `${b.percentage}%` }}
                       className={`h-full rounded-full ${
                         idx === 0
-                          ? 'bg-emerald-500'
+                          ? 'bg-[#c59d6b]'
                           : idx === 1
-                          ? 'bg-blue-500'
+                          ? 'bg-[#8b293e]'
                           : idx === 2
-                          ? 'bg-purple-500'
-                          : 'bg-amber-500'
+                          ? 'bg-[#d8b584]'
+                          : 'bg-[#5b1928]'
                       }`}
                     />
                   </div>
@@ -239,7 +239,7 @@ export const AnalyticsView: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-6 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 text-xs text-emerald-900 dark:text-emerald-300">
+          <div className="mt-6 p-4 rounded-lg bg-[#c59d6b]/10 dark:bg-[#c59d6b]/10 border border-[#c59d6b]/30 text-xs text-slate-800 dark:text-[#f3e3ce]">
             <strong>ეკონომიკური ეფექტი:</strong> ამქარმა თავიდან აგარიდათ <strong>1,840 ₾</strong>-ის გაუმართლებელი ფასდაკლებები მინიმალური ზღვრის მკაცრი დაცვით.
           </div>
         </div>

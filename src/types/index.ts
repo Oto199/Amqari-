@@ -112,7 +112,8 @@ export type AgentProcessingStatus =
   | 'received'
   | 'processing'
   | 'completed'
-  | 'failed';
+  | 'failed'
+  | 'human_review_required';
 
 export interface ExtractionResult {
   productQuery: string | null;
@@ -139,6 +140,10 @@ export interface PipelineExecutionResult {
   measuredLatencyMs: number;
   extraction: ExtractionResult;
   repliedToChat?: boolean;
+  conversationContextUsed?: Array<{ role: 'user' | 'assistant'; text: string }>;
+  requiresHumanReview?: boolean;
+  geminiStatus?: string;
+  validationStatus?: 'passed' | 'regenerated' | 'human_review_required';
 }
 
 export interface Conversation {

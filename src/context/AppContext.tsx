@@ -93,6 +93,7 @@ interface AppContextType {
   agentResultsByEventId: Record<string, PipelineExecutionResult>;
   processingEventIds: string[];
   processedEventIds: string[];
+  resetConversationMessages: (conversationId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -103,7 +104,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
 
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
-  const [selectedConversationId, setSelectedConversationId] = useState<string>('conv-1');
+  const [selectedConversationId, setSelectedConversationId] = useState<string>('conv-meta-customer-01');
   const [isAiTyping, setIsAiTyping] = useState<boolean>(false);
 
   const [approvals, setApprovals] = useState<ApprovalRequest[]>(INITIAL_APPROVALS);
@@ -273,38 +274,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsMetaConnected(false);
       const errMsg = lastErr ? String(lastErr.message || lastErr) : 'Unknown connection error';
       setLastPollError(errMsg);
-      console.warn('⚠️ [Meta API Polling] Connection offline:', errMsg);
+      console.info('ℹ️ [Meta API Polling] Connection offline:', errMsg);
     }
   };
 
   const syncBackendMessagesToConversations = (incomingMsgs: any[]) => {
-    // Process each message from the backend response
-    incomingMsgs.forEach((bm) => {
-      const senderId = String(bm.sender_id || 'customer-01');
-      const text = String(bm.text || '').trim();
-      const receivedAt = bm.received_at || new Date().toISOString();
-      const eventId = String(bm.event_id || `evt-${senderId}-${receivedAt}`);
-      const timeFormatted = receivedAt
-        ? new Date(receivedAt).toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' })
-        : new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' });
+    if (!incomingMsgs || incomingMsgs.length === 0) return;
 
-      const convId = `conv-meta-${senderId}`;
-      const msgId = bm.event_id ? `msg-meta-${bm.event_id}` : `msg-meta-${senderId}-${receivedAt}`;
+    // 1. Sort messages chronologically (oldest first)
+    const sorted = [...incomingMsgs].sort((a, b) => {
+      const timeA = new Date(a.received_at || 0).getTime();
+      const timeB = new Date(b.received_at || 0).getTime();
+      return timeA - timeB;
+    });
 
-      const newMsg: Message = {
-        id: msgId,
-        conversationId: convId,
-        sender: 'customer',
-        text,
-        sender_id: senderId,
-        received_at: receivedAt,
-        timestamp: timeFormatted,
-        read: false,
-      };
+    // 2. Batch update conversation messages
+    setConversations((prev) => {
+      let updatedList = [...prev];
 
-      // 1. Add customer message to conversation state
-      setConversations((prev) => {
-        const existingIndex = prev.findIndex(
+      sorted.forEach((bm) => {
+        const senderId = String(bm.sender_id || 'customer-01');
+        const text = String(bm.text || '').trim();
+        const receivedAt = bm.received_at || new Date().toISOString();
+        const eventId = String(bm.event_id || `evt-${senderId}-${receivedAt}`);
+        const timeFormatted = receivedAt
+          ? new Date(receivedAt).toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' })
+          : new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' });
+
+        const convId = `conv-meta-${senderId}`;
+        const msgId = bm.event_id ? `msg-meta-${bm.event_id}` : `msg-meta-${senderId}-${receivedAt}`;
+
+        const newMsg: Message = {
+          id: msgId,
+          conversationId: convId,
+          sender: 'customer',
+          text,
+          sender_id: senderId,
+          received_at: receivedAt,
+          timestamp: timeFormatted,
+          read: false,
+        };
+
+        const existingIndex = updatedList.findIndex(
           (c) =>
             c.id === convId ||
             c.customer.id === `cust-meta-${senderId}` ||
@@ -312,8 +323,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         );
 
         if (existingIndex >= 0) {
-          const updated = [...prev];
-          const existingConv = updated[existingIndex];
+          const existingConv = updatedList[existingIndex];
           const msgAlreadyExists = existingConv.messages.some(
             (m) => m.id === msgId || (m.text === text && m.timestamp === timeFormatted)
           );
@@ -322,18 +332,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ? existingConv.messages
             : [...existingConv.messages, newMsg];
 
-          updated[existingIndex] = {
+          updatedList[existingIndex] = {
             ...existingConv,
             lastMessage: newMsg,
             messages: updatedMessages,
             unreadCount: msgAlreadyExists ? existingConv.unreadCount : existingConv.unreadCount + 1,
             status: 'active',
           };
-
-          const [activeConv] = updated.splice(existingIndex, 1);
-          return [activeConv, ...updated];
         } else {
-          // Create new conversation for this sender_id
           const newCustomer: Customer = {
             id: `cust-meta-${senderId}`,
             name: `Instagram (${senderId})`,
@@ -368,108 +374,168 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             },
           };
 
-          return [newConv, ...prev];
+          updatedList = [newConv, ...updatedList];
         }
       });
 
-      // 2. Ignore if event_id is already processing or completed
-      if (processedEventIdsRef.current.has(eventId) || processingEventIdsRef.current.has(eventId)) {
-        return;
+      return updatedList;
+    });
+
+    // 3. Find unhandled messages
+    const unhandled = sorted.filter((bm) => {
+      const senderId = String(bm.sender_id || 'customer-01');
+      const receivedAt = bm.received_at || '';
+      const eventId = String(bm.event_id || `evt-${senderId}-${receivedAt}`);
+      return (
+        !processedEventIdsRef.current.has(eventId) &&
+        !processingEventIdsRef.current.has(eventId)
+      );
+    });
+
+    if (unhandled.length === 0) return;
+
+    // If multiple unhandled historical messages arrived at once (e.g. initial load),
+    // mark all except the latest one as processed so we don't blast concurrent API calls
+    if (unhandled.length > 1) {
+      for (let i = 0; i < unhandled.length - 1; i++) {
+        const oldBm = unhandled[i];
+        const oldSenderId = String(oldBm.sender_id || 'customer-01');
+        const oldReceivedAt = oldBm.received_at || '';
+        const oldEventId = String(oldBm.event_id || `evt-${oldSenderId}-${oldReceivedAt}`);
+        processedEventIdsRef.current.add(oldEventId);
       }
+      setProcessedEventIds(Array.from(processedEventIdsRef.current));
+    }
 
-      // 3. Mark event_id as processing
-      processingEventIdsRef.current.add(eventId);
-      setProcessingEventIds(Array.from(processingEventIdsRef.current));
+    const latestBm = unhandled[unhandled.length - 1];
+    const senderId = String(latestBm.sender_id || 'customer-01');
+    const convId = `conv-meta-${senderId}`;
+    const text = String(latestBm.text || '').trim();
+    const receivedAt = latestBm.received_at || new Date().toISOString();
+    const eventId = String(latestBm.event_id || `evt-${senderId}-${receivedAt}`);
+    const latestMsgId = `msg-${senderId}-${receivedAt}`;
 
-      // 4. Focus this conversation so the user sees real-time reasoning
-      setSelectedConversationId(convId);
+    // Find previous conversation history for this sender
+    const priorConv = conversations.find(
+      (c) => c.id === convId || c.customer.id === `cust-meta-${senderId}`
+    );
+    const history = priorConv
+      ? priorConv.messages
+          .filter((m) => m.id !== latestMsgId && m.text !== text)
+          .slice(-8)
+          .map((m) => ({
+            role: (m.sender === 'customer' ? 'user' : 'assistant') as 'user' | 'assistant',
+            text: m.text,
+          }))
+      : [];
 
-      // 5. Call actual agent pipeline for this event
-      setIsProcessingPipeline(true);
-      executeAgentPipeline(text, productsRef.current, settingsRef.current, { eventId, senderId })
-        .then((result) => {
-          // Mark completed
-          processingEventIdsRef.current.delete(eventId);
-          processedEventIdsRef.current.add(eventId);
-          setProcessingEventIds(Array.from(processingEventIdsRef.current));
-          setProcessedEventIds(Array.from(processedEventIdsRef.current));
+    // Mark event_id as processing
+    processingEventIdsRef.current.add(eventId);
+    setProcessingEventIds(Array.from(processingEventIdsRef.current));
 
-          // Store result in agentResultsByEventId
-          setAgentResultsByEventId((prev) => ({
-            ...prev,
-            [eventId]: result,
-          }));
+    // Focus this conversation so the user sees real-time reasoning
+    setSelectedConversationId(convId);
 
-          setPipelineResult(result);
-          setTraces((prev) => [result.trace, ...prev]);
+    // Call agent pipeline for this latest event with context history
+    setIsProcessingPipeline(true);
+    executeAgentPipeline(text, productsRef.current, settingsRef.current, {
+      eventId,
+      senderId,
+      history,
+    })
+      .then((result) => {
+        // Mark completed
+        processingEventIdsRef.current.delete(eventId);
+        processedEventIdsRef.current.add(eventId);
+        setProcessingEventIds(Array.from(processingEventIdsRef.current));
+        setProcessedEventIds(Array.from(processedEventIdsRef.current));
 
-          // Update conversation with latestAgentResult and auto-reply
-          setConversations((prev) =>
-            prev.map((c) => {
-              if (c.id === convId) {
-                const shouldAutoReply = settingsRef.current.autoReplyEnabled;
-                let updatedMessages = c.messages;
+        // Store result in agentResultsByEventId
+        setAgentResultsByEventId((prev) => ({
+          ...prev,
+          [eventId]: result,
+        }));
 
-                if (shouldAutoReply && result.generatedReply) {
-                  const aiMsgId = `reply-ai-${eventId}`;
-                  const alreadyReplied = c.messages.some((m) => m.id === aiMsgId);
-                  if (!alreadyReplied) {
-                    const aiMsg: Message = {
-                      id: aiMsgId,
-                      conversationId: c.id,
-                      sender: 'ai_agent',
-                      text: result.generatedReply,
-                      timestamp: new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' }),
-                      read: true,
-                      aiMetadata: {
-                        intent: result.trace.intent,
-                        productMatch: result.matchedProduct.title,
-                        inventoryChecked: true,
-                        discountOffered: result.counterOfferPrice ?? undefined,
-                        actionTaken: result.decisionType,
-                        confidence: 0,
-                      },
-                    };
-                    updatedMessages = [...updatedMessages, aiMsg];
-                  }
-                }
+        setPipelineResult(result);
+        setTraces((prev) => [result.trace, ...prev]);
 
+        // Update conversation with latestAgentResult and auto-reply
+        setConversations((prev) =>
+          prev.map((c) => {
+            if (c.id === convId) {
+              if (result.requiresHumanReview) {
+                // Human review required: do NOT pretend an AI reply was generated
                 return {
                   ...c,
-                  lastMessage: updatedMessages[updatedMessages.length - 1],
-                  messages: updatedMessages,
+                  status: 'pending_approval',
+                  agentProcessingStatus: 'human_review_required',
                   latestAgentResult: result,
                   lastEventId: eventId,
-                  agentProcessingStatus: 'completed',
-                  timeline: {
-                    productIdentified: {
-                      name: result.matchedProduct.title,
-                      timestamp: result.trace.timestamp,
-                    },
-                    inventoryChecked: {
-                      details: `${result.selectedSize} ზომა: ${result.stock} ცალი მარაგში`,
-                      timestamp: result.trace.timestamp,
-                    },
-                    discountEvaluated: {
-                      details: result.decisionDetails,
-                      timestamp: result.trace.timestamp,
-                    },
-                  },
                 };
               }
-              return c;
-            })
-          );
-        })
-        .catch((err) => {
-          console.error('Agent pipeline execution failed for event:', eventId, err);
-          processingEventIdsRef.current.delete(eventId);
-          setProcessingEventIds(Array.from(processingEventIdsRef.current));
-        })
-        .finally(() => {
-          setIsProcessingPipeline(false);
-        });
-    });
+
+              const shouldAutoReply = settingsRef.current.autoReplyEnabled;
+              let updatedMessages = c.messages;
+
+              if (shouldAutoReply && result.generatedReply) {
+                const aiMsgId = `reply-ai-${eventId}`;
+                const alreadyReplied = c.messages.some((m) => m.id === aiMsgId);
+                if (!alreadyReplied) {
+                  const aiMsg: Message = {
+                    id: aiMsgId,
+                    conversationId: c.id,
+                    sender: 'ai_agent',
+                    text: result.generatedReply,
+                    timestamp: new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' }),
+                    read: true,
+                    aiMetadata: {
+                      intent: result.trace.intent,
+                      productMatch: result.matchedProduct.title,
+                      inventoryChecked: true,
+                      discountOffered: result.counterOfferPrice ?? undefined,
+                      actionTaken: result.decisionType,
+                      confidence: 0,
+                    },
+                  };
+                  updatedMessages = [...updatedMessages, aiMsg];
+                }
+              }
+
+              return {
+                ...c,
+                lastMessage: updatedMessages[updatedMessages.length - 1],
+                messages: updatedMessages,
+                latestAgentResult: result,
+                lastEventId: eventId,
+                agentProcessingStatus: 'completed',
+                timeline: {
+                  productIdentified: {
+                    name: result.matchedProduct.title,
+                    timestamp: result.trace.timestamp,
+                  },
+                  inventoryChecked: {
+                    details: `${result.selectedSize} ზომა: ${result.stock} ცალი მარაგში`,
+                    timestamp: result.trace.timestamp,
+                  },
+                  discountEvaluated: {
+                    details: result.decisionDetails,
+                    timestamp: result.trace.timestamp,
+                  },
+                },
+              };
+            }
+            return c;
+          })
+        );
+      })
+      .catch((err) => {
+        console.info('[AI Agent] Pipeline execution note for event:', eventId, err?.message || err);
+        processingEventIdsRef.current.delete(eventId);
+        setProcessingEventIds(Array.from(processingEventIdsRef.current));
+      })
+      .finally(() => {
+        setIsProcessingPipeline(false);
+      });
   };
 
   // Polling GET /messages every 3 seconds from the backend
@@ -548,28 +614,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
-  const runPipelineForText = async (text: string): Promise<PipelineExecutionResult> => {
+  const resetConversationMessages = (conversationId: string) => {
+    setConversations((prev) =>
+      prev.map((c) => {
+        if (c.id === conversationId) {
+          return {
+            ...c,
+            messages: [],
+            lastMessage: {
+              id: `msg-reset-${Date.now()}`,
+              conversationId,
+              sender: 'ai_agent',
+              text: 'დიალოგი გასუფთავებულია. დაიწყეთ ტესტირება სატესტო ღილაკებით.',
+              timestamp: new Date().toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' }),
+              read: true,
+            },
+            status: 'active',
+            latestAgentResult: undefined,
+          };
+        }
+        return c;
+      })
+    );
+  };
+
+  const runPipelineForText = async (
+    text: string,
+    convId?: string
+  ): Promise<PipelineExecutionResult> => {
     setIsProcessingPipeline(true);
     const localEventId = `evt-manual-${Date.now()}`;
+    const targetConvId = convId || selectedConversationId;
+    const targetConv = conversations.find((c) => c.id === targetConvId);
+    const history = targetConv
+      ? targetConv.messages.slice(-8).map((m) => ({
+          role: (m.sender === 'customer' ? 'user' : 'assistant') as 'user' | 'assistant',
+          text: m.text,
+        }))
+      : [];
+
     try {
       const result = await executeAgentPipeline(
         text,
         productsRef.current,
         settingsRef.current,
-        { eventId: localEventId }
+        {
+          eventId: localEventId,
+          senderId: targetConv?.customer.id,
+          history,
+        }
       );
       setPipelineResult(result);
       setAgentResultsByEventId((prev) => ({ ...prev, [localEventId]: result }));
       setTraces((prev) => [result.trace, ...prev]);
 
-      if (selectedConversationId) {
+      if (targetConvId) {
         setConversations((prev) =>
           prev.map((c) => {
-            if (c.id === selectedConversationId) {
+            if (c.id === targetConvId) {
               return {
                 ...c,
                 latestAgentResult: result,
                 lastEventId: localEventId,
+                status: result.requiresHumanReview ? 'pending_approval' : c.status,
+                agentProcessingStatus: result.requiresHumanReview
+                  ? 'human_review_required'
+                  : 'completed',
               };
             }
             return c;
@@ -590,7 +700,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const lastCustomerMsg = userQuery || conv?.lastMessage.text || 'გამარჯობა';
 
     try {
-      const result = await runPipelineForText(lastCustomerMsg);
+      const result = await runPipelineForText(lastCustomerMsg, conversationId);
+
+      if (result.requiresHumanReview || !result.generatedReply) {
+        // Do not generate a fake AI response!
+        return;
+      }
 
       const aiMsg: Message = {
         id: `msg-${Date.now()}`,
@@ -614,6 +729,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               lastMessage: aiMsg,
               messages: [...c.messages, aiMsg],
               unreadCount: 0,
+              agentProcessingStatus: 'completed',
               timeline: {
                 ...c.timeline,
                 productIdentified: {
@@ -634,8 +750,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return c;
         })
       );
-    } catch (err) {
-      console.error('Pipeline processing error in triggerAiResponse:', err);
+    } catch (err: any) {
+      console.info('[AI Agent] Pipeline trigger note:', err?.message || err);
     } finally {
       setIsAiTyping(false);
     }
@@ -907,6 +1023,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         agentResultsByEventId,
         processingEventIds,
         processedEventIds,
+        resetConversationMessages,
       }}
     >
       {children}

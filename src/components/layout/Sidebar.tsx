@@ -16,6 +16,7 @@ import {
   LogOut,
   Sparkles,
 } from 'lucide-react';
+import amqariLogo from '../../assets/images/amqari logo.png';
 
 interface NavItem {
   id: PageId;
@@ -114,14 +115,19 @@ export const Sidebar: React.FC = () => {
           onClick={() => setPage('dashboard')}
           className="flex items-center gap-2.5 text-left group"
         >
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-sm font-bold text-sm tracking-tight transition-transform group-hover:scale-105">
-            ამ
+          <div className="w-9 h-9 rounded-lg p-1 border border-[#c59d6b]/30 bg-white dark:bg-slate-900 flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover:scale-105">
+            <img
+              src={amqariLogo}
+              alt="ამქარი ლოგო"
+              className="w-full h-full object-contain"
+            />
           </div>
           <div className="flex flex-col">
-            <span className="font-semibold text-base tracking-tight text-slate-900 dark:text-white leading-none">
-              ამქარი
+            <span className="font-bold text-base tracking-tight text-slate-900 dark:text-white leading-none flex items-center gap-1.5">
+              <span>ამქარი</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c59d6b]" />
             </span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-none font-mono">
+            <span className="text-[11px] text-[#c59d6b] dark:text-[#c59d6b]/90 mt-1 leading-none font-mono font-medium">
               amqari.ge
             </span>
           </div>
@@ -138,18 +144,19 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Meta Connection Badge */}
-      <div className="px-4 py-3 mx-3 my-2.5 rounded-lg border border-slate-200/70 dark:border-slate-800/70 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-between">
+      <div className="px-4 py-3 mx-3 my-2.5 rounded-lg border border-[#c59d6b]/20 dark:border-[#c59d6b]/20 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
           <div className="truncate">
-            <p className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
-              {isMetaConnected ? '🟢 Meta Connected' : '🔴 Meta Offline'}
+            <p className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${isMetaConnected ? 'bg-[#c59d6b]' : 'bg-[#8b293e]'}`} />
+              <span>{isMetaConnected ? 'Meta დაკავშირებულია' : 'Meta ხაზგარეშე'}</span>
             </p>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
               {isMetaConnected ? 'Polling (3s) · Live' : 'API Connection Lost'}
             </p>
           </div>
         </div>
-        <Sparkles className={`w-3.5 h-3.5 shrink-0 ${isMetaConnected ? 'text-emerald-500' : 'text-red-500'}`} />
+        <Sparkles className={`w-3.5 h-3.5 shrink-0 ${isMetaConnected ? 'text-[#c59d6b]' : 'text-[#8b293e]'}`} />
       </div>
 
       {/* Navigation List */}
@@ -157,6 +164,7 @@ export const Sidebar: React.FC = () => {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = page === item.id;
+          const isApprovals = item.id === 'approvals';
 
           return (
             <button
@@ -164,7 +172,7 @@ export const Sidebar: React.FC = () => {
               onClick={() => setPage(item.id)}
               className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-all text-left ${
                 isActive
-                  ? 'bg-slate-900 text-white dark:bg-emerald-500/15 dark:text-emerald-400 font-semibold'
+                  ? 'bg-slate-900 text-white dark:bg-[#c59d6b]/20 dark:text-[#c59d6b] font-semibold border-l-3 border-[#c59d6b]'
                   : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-900/60'
               }`}
             >
@@ -172,7 +180,7 @@ export const Sidebar: React.FC = () => {
                 <Icon
                   className={`w-4 h-4 shrink-0 ${
                     isActive
-                      ? 'text-white dark:text-emerald-400'
+                      ? 'text-[#c59d6b] dark:text-[#c59d6b]'
                       : 'text-slate-400 dark:text-slate-500'
                   }`}
                 />
@@ -183,8 +191,10 @@ export const Sidebar: React.FC = () => {
                 <span
                   className={`px-1.5 py-0.5 text-[10px] font-bold rounded-md tabular-nums ${
                     isActive
-                      ? 'bg-white/20 text-white dark:bg-emerald-400/20 dark:text-emerald-300'
-                      : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
+                      ? 'bg-white/20 text-white dark:bg-[#c59d6b]/40 dark:text-white'
+                      : isApprovals
+                      ? 'bg-[#8b293e]/15 text-[#8b293e] dark:bg-[#8b293e]/30 dark:text-[#f7c2cb]'
+                      : 'bg-[#c59d6b]/15 text-[#9e7949] dark:bg-[#c59d6b]/30 dark:text-[#c59d6b]'
                   }`}
                 >
                   {item.badge}
