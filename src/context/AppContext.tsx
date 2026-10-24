@@ -116,6 +116,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Event ID processing tracking
   const processedEventIdsRef = useRef<Set<string>>(new Set());
   const processingEventIdsRef = useRef<Set<string>>(new Set());
+  const deliveredResultIdsRef = useRef<Set<string>>(new Set());
+  const deliveringResultIdsRef = useRef<Set<string>>(new Set());
 
   const [agentResultsByEventId, setAgentResultsByEventId] = useState<Record<string, PipelineExecutionResult>>({});
   const [processingEventIds, setProcessingEventIds] = useState<string[]>([]);
@@ -277,7 +279,146 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.info('ℹ️ [Meta API Polling] Connection offline:', errMsg);
     }
   };
+  const deliverAgentResultToBackend = async (
+  eventId: string,
+  senderId: string,
+  result: PipelineExecutionResult,
+  history: Array<{ role: 'user' | 'assistant'; text: string }>
+): Promise<boolean> => {
+  if (
+    deliveredResultIdsRef.current.has(eventId) ||
+    deliveringResultIdsRef.current.has(eventId)
+  ) {
+    return deliveredResultIdsRef.current.has(eventId);
+  }
 
+  deliveringResultIdsRef.current.add(eventId);
+
+  const payload = {
+    event_id: eventId,
+    sender_id: senderId,
+    status: 'completed',
+
+    extraction_source:
+      result.extraction?.source || 'unknown',
+
+    gemini_available:
+      result.extraction?.source === 'gemini' ||
+      result.extraction?.source?.includes('gemini'),
+
+    intent:
+      result.extraction?.intent || null,
+
+    product_id:
+      result.matchedProduct?.id || null,
+
+    product_name:
+      result.matchedProduct?.title || null,
+
+    size:
+      result.selectedSize || null,
+
+    quantity: 1,
+
+    customer_offer:
+      result.extraction?.customerOffer ?? null,
+
+    stock:
+      result.stock ?? null,
+
+    catalogue_price:
+      result.matchedProduct?.price ?? null,
+
+    minimum_price:
+      result.matchedProduct?.minPrice ?? null,
+
+    decision:
+      result.decisionType || 'UNKNOWN',
+
+    generated_reply:
+      result.generatedReply || '',
+
+    processing_time_ms:
+      result.measuredLatencyMs ?? null,
+
+    context_used: {
+      history,
+      decision_details: result.decisionDetails,
+      requires_human_review:
+        result.requiresHumanReview ?? false,
+      counter_offer_price:
+        result.counterOfferPrice ?? null,
+    },
+  };
+
+  const endpoint =
+    'https://traffic-spearfish-tweezers.ngrok-free.dev/agent-results';
+
+  try {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.text();
+
+          throw new Error(
+            `HTTP ${response.status}: ${errorBody}`
+          );
+        }
+
+        const responseData = await response.json();
+
+        deliveredResultIdsRef.current.add(eventId);
+        deliveringResultIdsRef.current.delete(eventId);
+
+        console.log(
+          '✅ [Agent Result] Delivered to FastAPI:',
+          responseData
+        );
+
+        return true;
+      } catch (error) {
+        console.info(
+          `[Agent Result] Delivery attempt ${attempt}/3 failed:`,
+          error
+        );
+
+        if (attempt < 3) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, attempt * 750)
+          );
+        }
+      }
+    }
+
+    deliveringResultIdsRef.current.delete(eventId);
+
+    console.info(
+      '[Agent Result] Could not deliver result:',
+      eventId
+    );
+
+    return false;
+  } catch (error) {
+    deliveringResultIdsRef.current.delete(eventId);
+
+    console.info(
+      '[Agent Result] Unexpected callback error:',
+      error
+    );
+
+    return false;
+  }
+};
   const syncBackendMessagesToConversations = (incomingMsgs: any[]) => {
     if (!incomingMsgs || incomingMsgs.length === 0) return;
 
@@ -443,7 +584,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       senderId,
       history,
     })
-      .then((result) => {
+      .then(async (result) => {
         // Mark completed
         processingEventIdsRef.current.delete(eventId);
         processedEventIdsRef.current.add(eventId);
@@ -458,7 +599,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         setPipelineResult(result);
         setTraces((prev) => [result.trace, ...prev]);
+        const backendDelivered =
+        await deliverAgentResultToBackend(
+        eventId,
+        senderId,
+        result,
+        history
+         );
 
+        console.log(
+        backendDelivered
+        ? `✅ Result returned to FastAPI for ${eventId}`
+         : `⚠️ Result visible in Amqari but not returned for ${eventId}`
+        );
         // Update conversation with latestAgentResult and auto-reply
         setConversations((prev) =>
           prev.map((c) => {
